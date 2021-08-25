@@ -8,37 +8,32 @@
 
 ////////////////////////////////////////////////////
 ////////////////////////////////////////////////////
-        String DevNum = "#1";      //Production code
-        String AP = "Rumah Gas";                ////
-        String APpass = "rumahgas";             ////
+        String BokuID = "A1234";      //Production code
+        String AP = "Boku Box";                ////
+        String APpass = "bokuboxA1234";             ////
 ////////////////////////////////////////////////////
 ////////////////////////////////////////////////////
 
 //Variables
 int i = 0;
 int statusCode;
-//const char* ssid = "";
-//const char* passphrase = "";
 String st;
 String content;
-String token = "1934174372:AAEVXbfdOvipT6FOMj4rqgVo0aU8LvW4Ko0"; // REPLACE myToken WITH YOUR TELEGRAM BOT TOKEN
+const char* mqtt_server = "broker.hivemq.com";
+String publisher = BokuID+"/Boku";
+String subscriber = "Boku/"+BokuID;
+String Herocode = "";
 
-const int AdminID = -508399154;
-
-
-int UserID=0;
-String Address = "";
 
 //ESP1
-int Relay = 0;
-int OrderButt = 2;
+int LEDindicator = 0;
+int resetButton = 2;
 //ESP8266 12E
-//int Relay = 2;
-//int OrderButt = 4;
+//int LEDindicator = 2;
+//int resetButton = 4;
 
 
-bool fan = false;
-bool gas = false;
+bool state = false;
 //Function Decalration
 bool testWifi(void);
 void launchWeb(void);
@@ -49,7 +44,7 @@ void resetAll(void);
 //Establishing Local server at port 80 whenever required
 ESP8266WebServer server(80);
 
-void settingUp()
+void wifi_setting()
 {
 
   Serial.begin(115200); //Initialising if(DEBUG)Serial Monitor
@@ -58,10 +53,10 @@ void settingUp()
   WiFi.disconnect();
   EEPROM.begin(512); //Initialasing EEPROM
   delay(10);
-  pinMode(Relay, OUTPUT);
-  digitalWrite(Relay, HIGH);
-  pinMode(OrderButt, INPUT);
-  digitalWrite(OrderButt, HIGH);
+  pinMode(LEDindicator, OUTPUT);
+  digitalWrite(LEDindicator, HIGH);
+  pinMode(resetButton, INPUT);
+  digitalWrite(resetButton, HIGH);
   Serial.println();
   Serial.println();
   Serial.println("Startup");
@@ -87,23 +82,14 @@ void settingUp()
   Serial.print("PASS: ");
   Serial.println(epass);
 
-  String eaddress = "";
+  String eherocode = "";
   for (int i = 96; i < 106; ++i)
   {
-    eaddress += char(EEPROM.read(i));
+    eherocode += char(EEPROM.read(i));
   }
-  Serial.print("Address: ");
-  Serial.println(eaddress);
-  Address = eaddress;
-
-  String euserid = "";
-  for (int i = 106; i < 116; ++i)
-  {
-    euserid += char(EEPROM.read(i));
-  }
-  Serial.print("User ID: ");
-  Serial.println(euserid);
-  UserID = euserid.toInt();
+  Serial.print("Herocode: ");
+  Serial.println(eherocode);
+  Herocode = eherocode;
 
 
   WiFi.begin(esid.c_str(), epass.c_str());
@@ -111,8 +97,6 @@ void settingUp()
   {
   OTAfunc(esid.c_str(), epass.c_str(),"Boku-esp");
       //Connect to Bot
-  
-    
     
     Serial.println("Succesfully Connected!!!");
     return;
@@ -263,7 +247,7 @@ content +="</style>\n";
 content +="</head>\n";
 content +="<body>\n";
 content +="<h2>\""+AP+"\"</h2>\n<p> ";
-content += "<h3 style=color:#7E9CC0;>Device Number : "+DevNum+"</h3>\n";
+content += "<h3 style=color:#7E9CC0;>Boku ID : "+BokuID+"</h3>\n";
 content += "<p> Please select your Access Point</p>";
 content +="<div class=\"card\">  \n";
 content +="  <div class=\"container\">\n";
@@ -272,10 +256,8 @@ content +="      <label for=\"fname\">SSID</label><br>\n";
 content += st;
 content +="      <label>Password</label>\n";
 content +="      <input type=\"text\" name=\"pass\" placeholder=\"password\" required>\n";
-content +="      <label>Address</label>\n";
-content +="      <input type=\"text\" name=\"address\" placeholder=\"A1.1\" required>\n";
-content +="      <label>Telegram ID Group</label>\n";
-content +="      <input type=\"text\" name=\"userid\" placeholder=\"-123456789\" required>\n";
+content +="      <label>Herocode</label>\n";
+content +="      <input type=\"text\" name=\"herocode\" placeholder=\"BokuBox\" required>\n";
 content +="      <button type=\"submit\" >Connect</button> \n";
 content +="\t</form>   \n";
 content +="  </div>\n";
@@ -292,7 +274,7 @@ content +="</html> ";
     server.on("/setting", []() {
       String qsid = server.arg("ssid");
       String qpass = server.arg("pass");
-      String qaddress = server.arg("address");
+      String qherocode = server.arg("herocode");
       String quserid = server.arg("userid");
       if (qsid.length() > 0 && qpass.length() > 0) {
         Serial.println("clearing eeprom");
@@ -303,7 +285,7 @@ content +="</html> ";
         Serial.println("");
         Serial.println(qpass);
         Serial.println("");
-        Serial.println(qaddress);
+        Serial.println(qherocode);
         Serial.println("");
         Serial.println(quserid);
         Serial.println("");
@@ -322,20 +304,14 @@ content +="</html> ";
           Serial.print("Wrote: ");
           Serial.println(qpass[i]);
         }
-        Serial.println("writing eeprom address:");
-        for (int i = 0; i < qaddress.length(); ++i)
+        Serial.println("writing eeprom herocode:");
+        for (int i = 0; i < qherocode.length(); ++i)
         {
-          EEPROM.write(96 + i, qaddress[i]);
+          EEPROM.write(96 + i, qherocode[i]);
           Serial.print("Wrote: ");
-          Serial.println(qaddress[i]);
+          Serial.println(qherocode[i]);
         }
-        Serial.println("writing eeprom userid:");
-        for (int i = 0; i < quserid.length(); ++i)
-        {
-          EEPROM.write(106 + i, quserid[i]);
-          Serial.print("Wrote: ");
-          Serial.println(quserid[i]);
-        }
+
         EEPROM.commit();
 
         content = "{\"Success\":\"saved to eeprom... reset to boot into new wifi\"}";
