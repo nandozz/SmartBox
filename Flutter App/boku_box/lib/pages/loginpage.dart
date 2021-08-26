@@ -1,33 +1,72 @@
+// import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:flutter/services.dart';
 import 'dart:async';
+import '../controllers/MQTTManager.dart';
+import '../controllers/product_controller.dart';
+// import 'dart:io' show Platform;
 
-// var _scanBarcode = ''.obs;
-var count = 1.obs;
-var islock = false.obs;
+var islock = true.obs;
 void lock() {
-  // islock.value = !islock;
+  // configureAndConnect();
+  if (currentAppState.getAppConnectionState ==
+      MQTTAppConnectionState.connected) {
+    final String message = islock.value
+        ? "${bokuPass.value.text} open"
+        : "${bokuPass.value.text} close";
+    manager.publish(message);
+  }
   islock.value = !islock.value;
-  count++;
 }
 
 final Rx<TextEditingController> bokuID = TextEditingController().obs;
 final Rx<TextEditingController> bokuPass = TextEditingController().obs;
 final Rx<TextEditingController> addResi = TextEditingController().obs;
 final Rx<TextEditingController> resiNo = TextEditingController().obs;
-
+//  final TextEditingController _hostTextController = TextEditingController();
+// final TextEditingController _messageTextController = TextEditingController();
+// final TextEditingController _topicTextController = TextEditingController();
+MQTTAppState currentAppState;
+MQTTManager manager;
 String publish = "";
+// String _host = "broker.hivemq.com";
+// String _topic = "Boku/${bokuID.value.text}";
 
 // ignore: must_be_immutable
 class LoginPage extends StatelessWidget {
-  // const HomePages({Key? key}) : super(key: key);
-  // var islock = false.obs;
+  String _prepareStateMessageFrom(MQTTAppConnectionState state) {
+    switch (state) {
+      case MQTTAppConnectionState.connected:
+        return 'Connected';
+      case MQTTAppConnectionState.connecting:
+        return 'Connecting';
+      case MQTTAppConnectionState.disconnected:
+        return 'Disconnected';
+    }
+    return "CCOnnect loh";
+  }
+
+  void configureAndConnect() {
+    manager = MQTTManager(
+        host: "broker.hivemq.com",
+        topic: "Boku/${bokuID.value.text}",
+        state: currentAppState);
+    manager.initializeMQTTClient();
+    manager.connect();
+  }
+
+  // ignore: unused_element
+  void _disconnect() {
+    manager.disconnect();
+  }
 
   @override
   Widget build(BuildContext context) {
+    final MQTTAppState appState = Get.put(MQTTAppState());
+    currentAppState = appState;
     return Scaffold(
       body: SafeArea(
         child: Padding(
@@ -63,6 +102,17 @@ class LoginPage extends StatelessWidget {
                               labelStyle: TextStyle(color: Colors.amber),
                             ),
                           ),
+                          ElevatedButton(
+                            onPressed: () {
+                              configureAndConnect();
+                            },
+                            child: Text("Login"),
+                            style: ElevatedButton.styleFrom(
+                              primary: Colors.amber[500],
+                            ),
+                          ),
+                          Text(_prepareStateMessageFrom(
+                              currentAppState.getAppConnectionState)),
                           TextField(
                             controller: addResi.value,
                             style:
@@ -70,23 +120,54 @@ class LoginPage extends StatelessWidget {
                             decoration: InputDecoration(
                               labelText: "Add No.Resi",
                               labelStyle: TextStyle(color: Colors.amber),
+                              hintText: "AB123456789",
+                              hintStyle: TextStyle(
+                                  color: Colors.lightBlue.withOpacity(.5)),
+                              suffixIcon: IconButton(
+                                onPressed: () {
+                                  MQTTAppConnectionState state =
+                                      currentAppState.getAppConnectionState;
+                                  //
+                                  if (state ==
+                                      MQTTAppConnectionState.connected) {
+                                    final String message =
+                                        "${bokuPass.value.text} add ${addResi.value.text}";
+                                    manager.publish(message);
+                                    addResi.value.clear();
+                                  } else
+                                    addResi.value.clear();
+                                },
+                                icon: Icon(
+                                  Icons.add_box,
+                                  size: 35,
+                                  color: Colors.lightBlue,
+                                ),
+                              ),
                             ),
                           ),
                           SizedBox(height: 15),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: [
+                              Column(
+                                // mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  TextButton(
+                                    onPressed: () {},
+                                    child: Text("Restart"),
+                                  ),
+                                  TextButton(
+                                    onPressed: () {},
+                                    child: Text("Reset"),
+                                  ),
+                                ],
+                              ),
                               IconButton(
                                 iconSize: 35,
                                 onPressed: () => lock(),
                                 icon: islock.value
                                     ? Icon(Icons.lock)
                                     : Icon(Icons.lock_open),
-                              ),
-                              TextButton.icon(
-                                onPressed: () {},
-                                icon: Icon(Icons.send),
-                                label: Text("Hero"),
                               ),
                             ],
                           ),

@@ -1,6 +1,27 @@
-// import 'package:get/get.dart';
+import 'package:get/get.dart';
 
-// class ProductController extends GetxController{
-//   bool islock = false.obs;
+enum MQTTAppConnectionState { connected, disconnected, connecting }
 
-// }
+class MQTTAppState extends GetxController {
+  MQTTAppConnectionState _appConnectionState =
+      MQTTAppConnectionState.disconnected;
+  String _receivedText = '';
+  String _historyText = '';
+
+  void setReceivedText(String text) {
+    _receivedText = text;
+    _historyText = _historyText + '\n' + _receivedText;
+    // notifyListeners();
+    update();
+  }
+
+  void setAppConnectionState(MQTTAppConnectionState state) {
+    _appConnectionState = state;
+    // notifyListeners();
+    update();
+  }
+
+  String get getReceivedText => _receivedText;
+  String get getHistoryText => _historyText;
+  MQTTAppConnectionState get getAppConnectionState => _appConnectionState;
+}

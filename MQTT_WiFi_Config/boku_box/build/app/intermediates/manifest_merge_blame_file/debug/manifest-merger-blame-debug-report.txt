@@ -1,0 +1,128 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+3    package="com.example.boku_box"
+4    android:versionCode="1"
+5    android:versionName="1.0.0" >
+6
+7    <uses-sdk
+8        android:minSdkVersion="16"
+9        android:targetSdkVersion="29" />
+10    <!--
+11         Flutter needs it to communicate with the running application
+12         to allow setting breakpoints, to provide hot reload, etc.
+13    -->
+14    <uses-permission android:name="android.permission.INTERNET" />
+14-->D:\Agus's Files\SmartBox\MQTT_WiFi_Config\boku_box\android\app\src\debug\AndroidManifest.xml:6:5-66
+14-->D:\Agus's Files\SmartBox\MQTT_WiFi_Config\boku_box\android\app\src\debug\AndroidManifest.xml:6:22-64
+15    <uses-permission android:name="android.permission.CAMERA" />
+15-->D:\Agus's Files\SmartBox\MQTT_WiFi_Config\boku_box\android\app\src\debug\AndroidManifest.xml:7:5-64
+15-->D:\Agus's Files\SmartBox\MQTT_WiFi_Config\boku_box\android\app\src\debug\AndroidManifest.xml:7:22-62
+16    <uses-permission android:name="android.permission.VIBRATE" />
+16-->D:\Agus's Files\SmartBox\MQTT_WiFi_Config\boku_box\android\app\src\debug\AndroidManifest.xml:8:5-65
+16-->D:\Agus's Files\SmartBox\MQTT_WiFi_Config\boku_box\android\app\src\debug\AndroidManifest.xml:8:22-63
+17
+18    <uses-feature android:name="android.hardware.camera" />
+18-->[:flutter_barcode_scanner] D:\Agus's Files\SmartBox\MQTT_WiFi_Config\boku_box\build\flutter_barcode_scanner\intermediates\library_manifest\debug\AndroidManifest.xml:11:5-60
+18-->[:flutter_barcode_scanner] D:\Agus's Files\SmartBox\MQTT_WiFi_Config\boku_box\build\flutter_barcode_scanner\intermediates\library_manifest\debug\AndroidManifest.xml:11:19-57
+19
+20    <uses-permission android:name="android.permission.FLASHLIGHT" />
+20-->[:flutter_barcode_scanner] D:\Agus's Files\SmartBox\MQTT_WiFi_Config\boku_box\build\flutter_barcode_scanner\intermediates\library_manifest\debug\AndroidManifest.xml:13:5-69
+20-->[:flutter_barcode_scanner] D:\Agus's Files\SmartBox\MQTT_WiFi_Config\boku_box\build\flutter_barcode_scanner\intermediates\library_manifest\debug\AndroidManifest.xml:13:22-66
+21
+22    <application
+22-->D:\Agus's Files\SmartBox\MQTT_WiFi_Config\boku_box\android\app\src\main\AndroidManifest.xml:3:4-40:19
+23        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
+23-->[androidx.core:core:1.1.0] C:\Users\Laura Fiorela\.gradle\caches\transforms-2\files-2.1\2e94107f30f39be366a17347c2bf100b\core-1.1.0\AndroidManifest.xml:24:18-86
+24        android:debuggable="true"
+25        android:icon="@mipmap/ic_launcher"
+25-->D:\Agus's Files\SmartBox\MQTT_WiFi_Config\boku_box\android\app\src\main\AndroidManifest.xml:5:9-43
+26        android:label="boku_box"
+26-->D:\Agus's Files\SmartBox\MQTT_WiFi_Config\boku_box\android\app\src\main\AndroidManifest.xml:4:9-33
+27        android:largeHeap="true"
+27-->[:flutter_barcode_scanner] D:\Agus's Files\SmartBox\MQTT_WiFi_Config\boku_box\build\flutter_barcode_scanner\intermediates\library_manifest\debug\AndroidManifest.xml:16:9-33
+28        android:theme="@style/Theme.AppCompat.NoActionBar" >
+28-->[:flutter_barcode_scanner] D:\Agus's Files\SmartBox\MQTT_WiFi_Config\boku_box\build\flutter_barcode_scanner\intermediates\library_manifest\debug\AndroidManifest.xml:17:9-59
+29        <activity
+29-->D:\Agus's Files\SmartBox\MQTT_WiFi_Config\boku_box\android\app\src\main\AndroidManifest.xml:6:9-34:20
+30            android:name="com.example.boku_box.MainActivity"
+30-->D:\Agus's Files\SmartBox\MQTT_WiFi_Config\boku_box\android\app\src\main\AndroidManifest.xml:7:13-41
+31            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
+31-->D:\Agus's Files\SmartBox\MQTT_WiFi_Config\boku_box\android\app\src\main\AndroidManifest.xml:10:13-163
+32            android:hardwareAccelerated="true"
+32-->D:\Agus's Files\SmartBox\MQTT_WiFi_Config\boku_box\android\app\src\main\AndroidManifest.xml:11:13-47
+33            android:launchMode="singleTop"
+33-->D:\Agus's Files\SmartBox\MQTT_WiFi_Config\boku_box\android\app\src\main\AndroidManifest.xml:8:13-43
+34            android:theme="@style/LaunchTheme"
+34-->D:\Agus's Files\SmartBox\MQTT_WiFi_Config\boku_box\android\app\src\main\AndroidManifest.xml:9:13-47
+35            android:windowSoftInputMode="adjustResize" >
+35-->D:\Agus's Files\SmartBox\MQTT_WiFi_Config\boku_box\android\app\src\main\AndroidManifest.xml:12:13-55
+36
+37            <!--
+38                 Specifies an Android theme to apply to this Activity as soon as
+39                 the Android process has started. This theme is visible to the user
+40                 while the Flutter UI initializes. After that, this theme continues
+41                 to determine the Window background behind the Flutter UI.
+42            -->
+43            <meta-data
+43-->D:\Agus's Files\SmartBox\MQTT_WiFi_Config\boku_box\android\app\src\main\AndroidManifest.xml:17:13-20:17
+44                android:name="io.flutter.embedding.android.NormalTheme"
+44-->D:\Agus's Files\SmartBox\MQTT_WiFi_Config\boku_box\android\app\src\main\AndroidManifest.xml:18:15-70
+45                android:resource="@style/NormalTheme" />
+45-->D:\Agus's Files\SmartBox\MQTT_WiFi_Config\boku_box\android\app\src\main\AndroidManifest.xml:19:15-52
+46            <!--
+47                 Displays an Android View that continues showing the launch screen
+48                 Drawable until Flutter paints its first frame, then this splash
+49                 screen fades out. A splash screen is useful to avoid any visual
+50                 gap between the end of Android's launch screen and the painting of
+51                 Flutter's first frame.
+52            -->
+53            <meta-data
+53-->D:\Agus's Files\SmartBox\MQTT_WiFi_Config\boku_box\android\app\src\main\AndroidManifest.xml:26:13-29:17
+54                android:name="io.flutter.embedding.android.SplashScreenDrawable"
+54-->D:\Agus's Files\SmartBox\MQTT_WiFi_Config\boku_box\android\app\src\main\AndroidManifest.xml:27:15-79
+55                android:resource="@drawable/launch_background" />
+55-->D:\Agus's Files\SmartBox\MQTT_WiFi_Config\boku_box\android\app\src\main\AndroidManifest.xml:28:15-61
+56
+57            <intent-filter>
+57-->D:\Agus's Files\SmartBox\MQTT_WiFi_Config\boku_box\android\app\src\main\AndroidManifest.xml:30:13-33:29
+58                <action android:name="android.intent.action.MAIN" />
+58-->D:\Agus's Files\SmartBox\MQTT_WiFi_Config\boku_box\android\app\src\main\AndroidManifest.xml:31:17-68
+58-->D:\Agus's Files\SmartBox\MQTT_WiFi_Config\boku_box\android\app\src\main\AndroidManifest.xml:31:25-66
+59
+60                <category android:name="android.intent.category.LAUNCHER" />
+60-->D:\Agus's Files\SmartBox\MQTT_WiFi_Config\boku_box\android\app\src\main\AndroidManifest.xml:32:17-76
+60-->D:\Agus's Files\SmartBox\MQTT_WiFi_Config\boku_box\android\app\src\main\AndroidManifest.xml:32:27-74
+61            </intent-filter>
+62        </activity>
+63        <!--
+64             Don't delete the meta-data below.
+65             This is used by the Flutter tool to generate GeneratedPluginRegistrant.java
+66        -->
+67        <meta-data
+67-->D:\Agus's Files\SmartBox\MQTT_WiFi_Config\boku_box\android\app\src\main\AndroidManifest.xml:37:9-39:33
+68            android:name="flutterEmbedding"
+68-->D:\Agus's Files\SmartBox\MQTT_WiFi_Config\boku_box\android\app\src\main\AndroidManifest.xml:38:13-44
+69            android:value="2" />
+69-->D:\Agus's Files\SmartBox\MQTT_WiFi_Config\boku_box\android\app\src\main\AndroidManifest.xml:39:13-30
+70
+71        <activity android:name="com.amolg.flutterbarcodescanner.BarcodeCaptureActivity" />
+71-->[:flutter_barcode_scanner] D:\Agus's Files\SmartBox\MQTT_WiFi_Config\boku_box\build\flutter_barcode_scanner\intermediates\library_manifest\debug\AndroidManifest.xml:18:9-91
+71-->[:flutter_barcode_scanner] D:\Agus's Files\SmartBox\MQTT_WiFi_Config\boku_box\build\flutter_barcode_scanner\intermediates\library_manifest\debug\AndroidManifest.xml:18:19-88
+72        <activity
+72-->[com.google.android.gms:play-services-base:17.0.0] C:\Users\Laura Fiorela\.gradle\caches\transforms-2\files-2.1\7c879cb157fab2c9a5d74c3d70fd64e3\jetified-play-services-base-17.0.0\AndroidManifest.xml:23:9-26:75
+73            android:name="com.google.android.gms.common.api.GoogleApiActivity"
+73-->[com.google.android.gms:play-services-base:17.0.0] C:\Users\Laura Fiorela\.gradle\caches\transforms-2\files-2.1\7c879cb157fab2c9a5d74c3d70fd64e3\jetified-play-services-base-17.0.0\AndroidManifest.xml:24:13-79
+74            android:exported="false"
+74-->[com.google.android.gms:play-services-base:17.0.0] C:\Users\Laura Fiorela\.gradle\caches\transforms-2\files-2.1\7c879cb157fab2c9a5d74c3d70fd64e3\jetified-play-services-base-17.0.0\AndroidManifest.xml:25:13-37
+75            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+75-->[com.google.android.gms:play-services-base:17.0.0] C:\Users\Laura Fiorela\.gradle\caches\transforms-2\files-2.1\7c879cb157fab2c9a5d74c3d70fd64e3\jetified-play-services-base-17.0.0\AndroidManifest.xml:26:13-72
+76
+77        <meta-data
+77-->[com.google.android.gms:play-services-basement:17.0.0] C:\Users\Laura Fiorela\.gradle\caches\transforms-2\files-2.1\3c8e7eb3d21ac94d08f658f6d8a1c9f3\jetified-play-services-basement-17.0.0\AndroidManifest.xml:23:9-25:69
+78            android:name="com.google.android.gms.version"
+78-->[com.google.android.gms:play-services-basement:17.0.0] C:\Users\Laura Fiorela\.gradle\caches\transforms-2\files-2.1\3c8e7eb3d21ac94d08f658f6d8a1c9f3\jetified-play-services-basement-17.0.0\AndroidManifest.xml:24:13-58
+79            android:value="@integer/google_play_services_version" />
+79-->[com.google.android.gms:play-services-basement:17.0.0] C:\Users\Laura Fiorela\.gradle\caches\transforms-2\files-2.1\3c8e7eb3d21ac94d08f658f6d8a1c9f3\jetified-play-services-basement-17.0.0\AndroidManifest.xml:25:13-66
+80    </application>
+81
+82</manifest>
