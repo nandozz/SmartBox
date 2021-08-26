@@ -1,4 +1,0 @@
-#Thu Aug 26 01:47:49 ICT 2021
-base.0=D\:\\Agus's Files\\SmartBox\\MQTT_WiFi_Config\\boku_box\\build\\app\\intermediates\\dex\\debug\\mergeDexDebug\\classes.dex
-path.0=classes.dex
-renamed.0=classes.dex

@@ -89,7 +89,7 @@ void wifi_setting()
   }
   Serial.print("Herocode: ");
   Serial.println(eherocode);
-  Herocode = eherocode;
+  Herocode = eherocode.c_str();
 
 
   WiFi.begin(esid.c_str(), epass.c_str());
