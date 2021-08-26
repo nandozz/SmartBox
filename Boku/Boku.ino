@@ -33,6 +33,17 @@ void callback(char* topic, byte* payload, unsigned int length) {
     if (getValue(msg, ' ', 1) == "add"){
       
     Serial.println("Save No.Resi "+getValue(msg, ' ', 2));
+    
+    EEPROM.begin(512);
+    for (int i = 0; i < getValue(msg, ' ', 2).length(); ++i)
+        {
+          EEPROM.write(106 + i, getValue(msg, ' ', 2)[i]);
+          Serial.print("Wrote: ");
+          Serial.println(getValue(msg, ' ', 2)[i]);
+        }
+
+        EEPROM.commit();
+    
     }
     else if (getValue(msg, ' ', 1) == "open"){
     Serial.println("Boku Open");
@@ -57,8 +68,20 @@ void callback(char* topic, byte* payload, unsigned int length) {
     Serial.println("Boku reset");
     resetAll();
     }
+////////////////////////////// COURIER ///////////////////////////////////
   }else if (getValue(msg, ' ', 0) == "courier"){
-    if (getValue(msg, ' ', 1) == "AGS"){
+
+  String enoResi="";
+  for (int i = 106; i < 111; ++i)
+  {
+    enoResi += char(EEPROM.read(i));
+  }
+  Serial.println();
+  Serial.print("No. Paket: ");
+  Serial.println(enoResi);
+  Serial.println("Reading EEPROM No. Paket");
+    
+    if (getValue(msg, ' ', 1) == enoResi){
       
     Serial.println("No. Resi Benar, Boku Open ");
     }
