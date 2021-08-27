@@ -96,7 +96,7 @@ class MQTTManager {
 
       // final MqttPublishMessage recMess = c![0].payload;
       final String pt =
-          MqttPublishPayload.bytesToStringAsString(recMess.payload.message!);
+          MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
       _currentState.setReceivedText(pt);
       print(
           'EXAMPLE::Change notification:: topic is <${c[0].topic}>, payload is <-- $pt -->');

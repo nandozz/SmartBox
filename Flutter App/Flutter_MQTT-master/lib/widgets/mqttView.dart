@@ -79,25 +79,58 @@ class _MQTTViewState extends State<MQTTView> {
   }
 
   Widget _buildEditableColumn() {
-    return Padding(
-      padding: const EdgeInsets.all(20.0),
-      child: Column(
-        children: <Widget>[
-          // _buildTextFieldWith(_hostTextController, 'Enter broker address',
-          //     currentAppState.getAppConnectionState),
-          // const SizedBox(height: 10),
-          _buildTextFieldWith(_bokuIDTextController, 'Enter your Boku ID',
-              currentAppState.getAppConnectionState),
-          const SizedBox(height: 10),
-          _buildTextFieldWith(_bokuPassTextController, 'Enter your Boku Pass',
-              currentAppState.getAppConnectionState),
-          const SizedBox(height: 10),
-          _buildConnecteButtonFrom(currentAppState.getAppConnectionState),
-          const SizedBox(height: 10),
-          _buildPublishMessageRow(),
-          const SizedBox(height: 10),
-          _buildLockButtonFrom(currentAppState.getAppConnectionState),
-        ],
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          children: <Widget>[
+            // _buildTextFieldWith(_hostTextController, 'Enter broker address',
+            //     currentAppState.getAppConnectionState),
+            // const SizedBox(height: 10),
+            const Text(
+              'Hero',
+              style: TextStyle(fontSize: 25),
+            ),
+            const SizedBox(height: 35),
+            _buildTextFieldWith(_bokuIDTextController, 'Enter your Boku ID',
+                currentAppState.getAppConnectionState),
+            const SizedBox(height: 10),
+            _buildTextFieldWith(_bokuPassTextController, 'Enter your Boku Pass',
+                currentAppState.getAppConnectionState),
+            const SizedBox(height: 10),
+            _buildConnecteButtonFrom(currentAppState.getAppConnectionState),
+            const SizedBox(height: 10),
+            _buildPublishMessageRow(),
+            const SizedBox(height: 10),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Column(
+                  // mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    TextButton(
+                      onPressed: () {},
+                      child: Text("Restart"),
+                    ),
+                    TextButton(
+                      onPressed: () {},
+                      child: Text("Reset"),
+                    ),
+                  ],
+                ),
+                SizedBox(
+                  width: 25,
+                ),
+                _buildLockButtonFrom(currentAppState.getAppConnectionState),
+              ],
+            ),
+            const Text(
+              'Courier',
+              style: TextStyle(fontSize: 25),
+            ),
+            const SizedBox(height: 35),
+          ],
+        ),
       ),
     );
   }
