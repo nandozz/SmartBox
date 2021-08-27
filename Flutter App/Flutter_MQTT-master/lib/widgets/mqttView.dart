@@ -1,8 +1,12 @@
+import 'dart:async';
 import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_mqtt_app/mqtt/state/MQTTAppState.dart';
 import 'package:flutter_mqtt_app/mqtt/MQTTManager.dart';
+import 'package:lottie/lottie.dart';
+import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
+import 'package:flutter/services.dart';
 
 class MQTTView extends StatefulWidget {
   @override
@@ -16,10 +20,11 @@ class _MQTTViewState extends State<MQTTView> {
   final TextEditingController _messageTextController = TextEditingController();
   final TextEditingController _bokuIDTextController = TextEditingController();
   final TextEditingController _bokuPassTextController = TextEditingController();
+  final TextEditingController _scanBarcodeTextController =
+      TextEditingController();
 
   late MQTTAppState currentAppState;
   late MQTTManager manager;
-  bool isLock = true;
 
   @override
   void initState() {
@@ -56,7 +61,8 @@ class _MQTTViewState extends State<MQTTView> {
     final MQTTAppState appState = Provider.of<MQTTAppState>(context);
     // Keep a reference to the app state.
     currentAppState = appState;
-    final Scaffold scaffold = Scaffold(body: SafeArea(child: _buildColumn()));
+    final Scaffold scaffold = Scaffold(
+        body: SafeArea(child: SingleChildScrollView(child: _buildColumn())));
     return scaffold;
   }
 
@@ -92,43 +98,157 @@ class _MQTTViewState extends State<MQTTView> {
               style: TextStyle(fontSize: 25),
             ),
             const SizedBox(height: 35),
-            _buildTextFieldWith(_bokuIDTextController, 'Enter your Boku ID',
+            _buildTextFieldWith(_bokuIDTextController, 'Boku ID',
                 currentAppState.getAppConnectionState),
             const SizedBox(height: 10),
-            _buildTextFieldWith(_bokuPassTextController, 'Enter your Boku Pass',
+            _buildTextFieldWith(_bokuPassTextController, 'Boku Password',
                 currentAppState.getAppConnectionState),
             const SizedBox(height: 10),
             _buildConnecteButtonFrom(currentAppState.getAppConnectionState),
+            const SizedBox(height: 10),
+            Row(
+              // ignore: always_specify_types
+              children: [
+                IconButton(
+                  onPressed: () {
+                    currentAppState.getAppConnectionState ==
+                            MQTTAppConnectionState.connected
+                        ? _publishMessage(
+                            '${_bokuPassTextController.text} list')
+                        : _configureAndConnect();
+
+                    final String uplist = currentAppState.getReceivedText;
+                    uplist.split(' ');
+                    print(uplist);
+                    if (uplist[0] == 'uplist') {
+                      print(uplist[1]);
+                    }
+                  },
+                  icon: const Icon(Icons.list_alt),
+                ),
+                const SizedBox(height: 10),
+                const Text('no resi')
+              ],
+            ),
+
             const SizedBox(height: 10),
             _buildPublishMessageRow(),
             const SizedBox(height: 10),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
+              // ignore: always_specify_types
               children: [
                 Column(
                   // mainAxisAlignment: MainAxisAlignment.center,
+                  // ignore: always_specify_types
                   children: [
                     TextButton(
-                      onPressed: () {},
-                      child: Text("Restart"),
+                      onPressed: () {
+                        currentAppState.getAppConnectionState ==
+                                MQTTAppConnectionState.connected
+                            ? _publishMessage(
+                                '${_bokuPassTextController.text} restart')
+                            : _configureAndConnect();
+                      },
+                      child: const Text('Restart'),
                     ),
                     TextButton(
-                      onPressed: () {},
-                      child: Text("Reset"),
+                      onPressed: () {
+                        currentAppState.getAppConnectionState ==
+                                MQTTAppConnectionState.connected
+                            ? _publishMessage(
+                                '${_bokuPassTextController.text} reset')
+                            : _configureAndConnect();
+                      },
+                      child: const Text('Reset'),
                     ),
                   ],
                 ),
-                SizedBox(
+                const SizedBox(
                   width: 25,
                 ),
                 _buildLockButtonFrom(currentAppState.getAppConnectionState),
               ],
             ),
+            ////////////////////////////////////////////////////////
+
+            const SizedBox(height: 45),
+            Lottie.asset(
+              'assets/lottie/walkingbox.json',
+              // 'https://assets7.lottiefiles.com/packages/lf20_i7bmwsni.json',
+              width: 75,
+              height: 75,
+              fit: BoxFit.cover,
+            ),
+            ///////////////////////////////////// COURIER /////////////////////////////////////////////////
+
+            const SizedBox(height: 45),
+
+            ///////////////////////////////////////////////////////
             const Text(
               'Courier',
               style: TextStyle(fontSize: 25),
             ),
             const SizedBox(height: 35),
+            TextField(
+              controller: _bokuIDTextController,
+              style: const TextStyle(fontSize: 18, color: Colors.black54),
+              decoration: InputDecoration(
+                labelText: 'Boku ID',
+                labelStyle: const TextStyle(color: Colors.amber),
+                hintText: 'Ketik/scan Boku ID',
+                hintStyle: TextStyle(color: Colors.lightBlue.withOpacity(.5)),
+                suffixIcon: IconButton(
+                  onPressed: () {
+                    scanQR(_bokuIDTextController, 1);
+                  },
+                  icon: const Icon(
+                    Icons.camera_alt,
+                    size: 35,
+                    color: Colors.lightBlue,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 35),
+            TextField(
+              controller: _scanBarcodeTextController,
+              style: const TextStyle(fontSize: 18, color: Colors.black54),
+              decoration: InputDecoration(
+                labelText: 'No.Resi',
+                labelStyle: const TextStyle(color: Colors.amber),
+                hintText: 'Ketik/scan No.Resi',
+                hintStyle: TextStyle(color: Colors.lightBlue.withOpacity(.5)),
+                suffixIcon: IconButton(
+                  onPressed: () {
+                    scanQR(_scanBarcodeTextController, 2);
+                  },
+                  icon: const Icon(
+                    Icons.camera_alt,
+                    size: 35,
+                    color: Colors.lightBlue,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 35),
+            TextButton.icon(
+              onPressed: () {
+                currentAppState.getAppConnectionState ==
+                        MQTTAppConnectionState.connected
+                    ? _publishMessage(
+                        'courier ${_scanBarcodeTextController.text}')
+                    : _configureAndConnect();
+              },
+              icon: currentAppState.getAppConnectionState ==
+                      MQTTAppConnectionState.connected
+                  ? const Icon(Icons.open_in_full)
+                  : const Icon(Icons.connect_without_contact),
+              label: currentAppState.getAppConnectionState ==
+                      MQTTAppConnectionState.connected
+                  ? const Text('Open')
+                  : const Text('Connect'),
+            ),
           ],
         ),
       ),
@@ -153,7 +273,7 @@ class _MQTTViewState extends State<MQTTView> {
       children: <Widget>[
         Expanded(
           child: Container(
-              color: Colors.deepOrangeAccent,
+              color: Colors.amber,
               child: Text(status, textAlign: TextAlign.center)),
         ),
       ],
@@ -185,12 +305,23 @@ class _MQTTViewState extends State<MQTTView> {
   Widget _buildScrollableTextWith(String text) {
     return Padding(
       padding: const EdgeInsets.all(20.0),
-      child: Container(
-        width: 400,
-        height: 200,
-        child: SingleChildScrollView(
-          child: Text(text),
-        ),
+      child: Column(
+        // ignore: always_specify_types
+        children: [
+          IconButton(
+            onPressed: () {
+              currentAppState.setClearHistoryText();
+            },
+            icon: const Icon(Icons.refresh),
+          ),
+          Container(
+            width: 400,
+            height: 200,
+            child: SingleChildScrollView(
+              child: Text(text),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -201,7 +332,7 @@ class _MQTTViewState extends State<MQTTView> {
         Expanded(
           // ignore: deprecated_member_use
           child: RaisedButton(
-            color: Colors.lightBlueAccent,
+            color: Colors.amber,
             child: const Text('Login'),
             onPressed: state == MQTTAppConnectionState.disconnected
                 ? _configureAndConnect
@@ -212,7 +343,7 @@ class _MQTTViewState extends State<MQTTView> {
         Expanded(
           // ignore: deprecated_member_use
           child: RaisedButton(
-            color: Colors.redAccent,
+            color: Colors.amber[200],
             child: const Text('Logout'),
             onPressed: state == MQTTAppConnectionState.connected
                 ? _disconnect
@@ -257,13 +388,16 @@ class _MQTTViewState extends State<MQTTView> {
       iconSize: 35,
       onPressed: state == MQTTAppConnectionState.connected
           ? () {
-              isLock
-                  ? _publishMessage('${_bokuPassTextController.text} open')
-                  : _publishMessage('${_bokuPassTextController.text} close');
+              currentAppState.changeLock(currentAppState.getState);
+              currentAppState.getState
+                  ? _publishMessage('${_bokuPassTextController.text} close')
+                  : _publishMessage('${_bokuPassTextController.text} open');
             }
           : null, //
 
-      icon: isLock ? const Icon(Icons.lock) : const Icon(Icons.lock_open),
+      icon: currentAppState.getState
+          ? const Icon(Icons.lock)
+          : const Icon(Icons.lock_open),
       // () => lock(),
     );
   }
@@ -288,6 +422,7 @@ class _MQTTViewState extends State<MQTTView> {
       osPrefix = 'Flutter_Android';
     }
     final String _topic = 'Boku/${_bokuIDTextController.text}';
+
     manager = MQTTManager(
         host: 'broker.hivemq.com',
         topic: _topic,
@@ -309,5 +444,24 @@ class _MQTTViewState extends State<MQTTView> {
     final String message = text;
     manager.publish(message);
     _messageTextController.clear();
+  }
+
+  Future<void> scanQR(TextEditingController controller, int mode) async {
+    String barcodeScanRes;
+    // Platform messages may fail, so we use a try/catch PlatformException.
+    try {
+      barcodeScanRes = mode == 1
+          ? await FlutterBarcodeScanner.scanBarcode(
+              '#ff6666', 'Cancel', true, ScanMode.QR)
+          : await FlutterBarcodeScanner.scanBarcode(
+              '#ff6666', 'Cancel', true, ScanMode.BARCODE);
+      if (barcodeScanRes == '-1') {
+        barcodeScanRes = 'Failed to get the code';
+      }
+      print(barcodeScanRes);
+    } on PlatformException {
+      barcodeScanRes = 'Failed to get platform version.';
+    }
+    controller.text = barcodeScanRes;
   }
 }

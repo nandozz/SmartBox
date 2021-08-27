@@ -9,8 +9,8 @@ class MQTTAppState with ChangeNotifier {
   String _historyText = '';
   bool _isLock = true;
 
-  void setIsLock() {
-    _isLock = !_isLock;
+  void changeLock(bool isLock) {
+    _isLock = !isLock;
     notifyListeners();
   }
 
@@ -25,9 +25,16 @@ class MQTTAppState with ChangeNotifier {
     notifyListeners();
   }
 
+  void setClearHistoryText() {
+    _historyText = '';
+    notifyListeners();
+  }
+
   String get getReceivedText => _receivedText;
   String get getHistoryText => _historyText;
-  bool get isLock => _isLock;
+  // String get getClearHistoryText => _historyText;
+
+  bool get getState => _isLock;
 
   MQTTAppConnectionState get getAppConnectionState => _appConnectionState;
 }
