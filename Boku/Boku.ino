@@ -1,6 +1,8 @@
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
 #include "wifiConfig.h";
+#include <Servo.h>
+Servo servo;
 
 //String stringOne = "<HTML><HEAD><BODY>";
   
@@ -24,18 +26,20 @@ void callback(char* topic, byte* payload, unsigned int length) {
   }
   Serial.println();
   msg = String(code);
+  
+  Serial.println("word 0 = "+getValue(msg, ' ', 0));
   Serial.println("word 1 = "+getValue(msg, ' ', 1));
   Serial.println("word 2 = "+getValue(msg, ' ', 2));
   
-//Bokuno
+////////////////////// Bokuno
   if (getValue(msg, ' ', 0) == Herocode){
-
-    if (getValue(msg, ' ', 1) == "add"){
-      
+    
+    //////////////////// ADD ///////////////////
+    if (getValue(msg, ' ', 1) == "add"){      
     Serial.println("Save No.Resi "+getValue(msg, ' ', 2));
     
     EEPROM.begin(512);
-    for (int i = 0; i < getValue(msg, ' ', 2).length(); ++i)
+    for (int i = 0; i < 5; ++i)
         {
           EEPROM.write(106 + i, getValue(msg, ' ', 2)[i]);
           Serial.print("Wrote: ");
@@ -45,29 +49,52 @@ void callback(char* topic, byte* payload, unsigned int length) {
         EEPROM.commit();
     
     }
+    /////////////////// OPEN //////////////////////
     else if (getValue(msg, ' ', 1) == "open"){
     Serial.println("Boku Open");
+    delay(10);
+    servo.write(90);
+    delay(100);
     digitalWrite(LEDindicator, LOW);
 //    snprintf (msg, MSG_BUFFER_SIZE, "Boku Open",_);
     Serial.print("Publish message: Boku Open");
     client.publish(publisher.c_str(), "Boku Open");
     }
+    //////////////////// CLOSE ///////////////////
     else if (getValue(msg, ' ', 1) == "close"){
     Serial.println("Boku Close");
+    delay(10);
+    servo.write(0);
+    delay(100);
     digitalWrite(LEDindicator, HIGH);
     Serial.print("Publish message: Boku Close");
     client.publish(publisher.c_str(), "Boku Close");
     }
+    
+    //////////////////// RESTATRT ///////////////////
     else if (getValue(msg, ' ', 1) == "restart"){
        client.publish(publisher.c_str(), "RESTART DONE");
+       delay(1000);
     Serial.println("Boku restart");
     ESP.restart();
     }
+    
+    //////////////////// RESET ///////////////////
     else if (getValue(msg, ' ', 1) == "reset"){
        client.publish(publisher.c_str(), "RESET DONE");
+       delay(1000);
     Serial.println("Boku reset");
     resetAll();
     }
+    
+    //////////////////// CLEAR ///////////////////
+     else if (getValue(msg, ' ', 1) == "clear"){
+       client.publish(publisher.c_str(), "List Clear");
+       clearRes();
+    Serial.println("Boku No.Resi Clear");
+    readRes();
+    }
+
 ////////////////////////////// COURIER ///////////////////////////////////
   }else if (getValue(msg, ' ', 0) == "courier"){
 
@@ -77,13 +104,22 @@ void callback(char* topic, byte* payload, unsigned int length) {
     enoResi += char(EEPROM.read(i));
   }
   Serial.println();
-  Serial.print("No. Paket: ");
+  Serial.print("No. Paket Terdaftar: ");
   Serial.println(enoResi);
-  Serial.println("Reading EEPROM No. Paket");
+  
     
     if (getValue(msg, ' ', 1) == enoResi){
       
+    client.publish(publisher.c_str(), "Courier Open");
     Serial.println("No. Resi Benar, Boku Open ");
+    delay(10);
+    servo.write(90);
+    delay(5000);
+    servo.write(0);
+    client.publish(publisher.c_str(), "Courier Close");
+    delay(100);
+    
+
     }
   }
 }
@@ -117,7 +153,7 @@ void reconnect() {
     if (client.connect(clientId.c_str())) {
       Serial.println("connected");
       // Once connected, publish an announcement...
-      client.publish(publisher.c_str(), "hello Boku Hero");
+      client.publish(publisher.c_str(), "Hello, Boku");
       // ... and resubscribe
       client.subscribe(subscriber.c_str());
     } else {
@@ -132,7 +168,11 @@ void reconnect() {
 
 void setup() {
   pinMode(BUILTIN_LED, OUTPUT);     // Initialize the BUILTIN_LED pin as an output
- 
+ servo.attach(2); //D4
+
+servo.write(0);
+
+delay(2000);
   wifi_setting();
   client.setServer(mqtt_server, 1883);
   client.setCallback(callback);
@@ -144,15 +184,5 @@ void loop() {
   if (!client.connected()) {
     reconnect();
   }
-  client.loop();
-
-//  unsigned long now = millis();
-//  if (now - lastMsg > 2000) {
-//    lastMsg = now;
-//    ++value;
-//    snprintf (msg, MSG_BUFFER_SIZE, "hello world #%ld", value);
-//    Serial.print("Publish message: ");
-//    Serial.println(msg);
-//    client.publish(publisher.c_str(), msg);
-  
+  client.loop();  
 }

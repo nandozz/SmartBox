@@ -27,7 +27,7 @@ String Herocode = "";
 
 //ESP1
 int LEDindicator = 0;
-int resetButton = 2;
+//int resetButton = 2;
 //ESP8266 12E
 //int LEDindicator = 2;
 //int resetButton = 4;
@@ -55,8 +55,8 @@ void wifi_setting()
   delay(10);
   pinMode(LEDindicator, OUTPUT);
   digitalWrite(LEDindicator, HIGH);
-  pinMode(resetButton, INPUT);
-  digitalWrite(resetButton, HIGH);
+//  pinMode(resetButton, INPUT);
+//  digitalWrite(resetButton, HIGH);
   Serial.println();
   Serial.println();
   Serial.println("Startup");
@@ -209,7 +209,24 @@ void resetAll(){
   EEPROM.end();
   ESP.restart();
 }
-
+void clearRes(){
+  EEPROM.begin(512);
+  // write a 0 to all 512 bytes of the EEPROM
+  for (int i = 106; i < 512; i++) {
+    EEPROM.write(i, 0);
+  }
+  EEPROM.end();
+}
+void readRes(){
+  String enoResi = "";
+  for (int i = 106; i < 111; ++i)
+  {
+    enoResi += char(EEPROM.read(i));
+  }
+  Serial.println();
+  Serial.print("No. Paket Terdaftar: ");
+  Serial.println(enoResi);
+}
 void createWebServer()
 {
  {
