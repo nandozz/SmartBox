@@ -5,6 +5,15 @@
 #include <ESP8266HTTPClient.h>
 #include <ESP8266WebServer.h>
 #include <EEPROM.h>
+#include <Servo.h>
+Servo servo;
+
+
+WiFiClient espClient;
+PubSubClient client(espClient);
+unsigned long lastMsg = 0;
+#define MSG_BUFFER_SIZE  (50)
+char msgi[MSG_BUFFER_SIZE];
 
 ////////////////////////////////////////////////////
 ////////////////////////////////////////////////////
@@ -23,6 +32,7 @@ const char* mqtt_server = "broker.hivemq.com";
 String publisher = BokuID+"/Boku";
 String subscriber = "Boku/"+BokuID;
 String Herocode = "";
+String NoResi = "";
 
 
 //ESP1
@@ -90,6 +100,16 @@ void wifi_setting()
   Serial.print("Herocode: ");
   Serial.println(eherocode);
   Herocode = eherocode.c_str();
+
+  String enoResi = "";
+  for (int i = 106; i < 111; ++i)
+  {
+    enoResi += char(EEPROM.read(i));
+  }
+  Serial.println();
+  Serial.print("No. Paket Terdaftar: ");
+  Serial.println(enoResi);
+  NoResi = enoResi.c_str();
 
 
   WiFi.begin(esid.c_str(), epass.c_str());
@@ -209,7 +229,7 @@ void resetAll(){
   EEPROM.end();
   ESP.restart();
 }
-void clearRes(){
+void clearList(){
   EEPROM.begin(512);
   // write a 0 to all 512 bytes of the EEPROM
   for (int i = 106; i < 512; i++) {
@@ -217,7 +237,7 @@ void clearRes(){
   }
   EEPROM.end();
 }
-void readRes(){
+void readList(){
   String enoResi = "";
   for (int i = 106; i < 111; ++i)
   {
@@ -226,7 +246,33 @@ void readRes(){
   Serial.println();
   Serial.print("No. Paket Terdaftar: ");
   Serial.println(enoResi);
+  NoResi = enoResi.c_str();
+
+  client.publish(publisher.c_str(), NoResi.c_str());
+     delay(100);
+      snprintf (msgi, MSG_BUFFER_SIZE, "List %s",NoResi.c_str() );
+   client.publish(subscriber.c_str(),msgi);
 }
+void bokuOpen(){
+  Serial.println("Boku Open");
+    delay(10);
+    servo.write(90);
+    delay(100);
+    digitalWrite(LEDindicator, LOW);
+    Serial.print("Publish message: Boku Open");
+    client.publish(publisher.c_str(), "Boku Open");
+}
+
+void bokuClose(){
+  Serial.println("Boku Close");
+    delay(10);
+    servo.write(0);
+    delay(100);
+    digitalWrite(LEDindicator, HIGH);
+    Serial.print("Publish message: Boku Close");
+    client.publish(publisher.c_str(), "Boku Close");
+}
+
 void createWebServer()
 {
  {
@@ -274,7 +320,7 @@ content += st;
 content +="      <label>Password</label>\n";
 content +="      <input type=\"text\" name=\"pass\" placeholder=\" SSID password\" required>\n";
 content +="      <label>Boku Password</label>\n";
-content +="      <input type=\"text\" name=\"herocode\" placeholder=\"new password\" required>\n";
+content +="      <input type=\"text\" name=\"herocode\" placeholder=\"password\" maxlength=\"10\" required>\n";
 content +="      <button type=\"submit\" >Connect</button> \n";
 content +="\t</form>   \n";
 content +="  </div>\n";

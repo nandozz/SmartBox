@@ -1,18 +1,18 @@
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
 #include "wifiConfig.h";
-#include <Servo.h>
-Servo servo;
+
 
 //String stringOne = "<HTML><HEAD><BODY>";
   
+//
+//WiFiClient espClient;
+//PubSubClient client(espClient);
+//unsigned long lastMsg = 0;
+//#define MSG_BUFFER_SIZE	(50)
+//char msgi[MSG_BUFFER_SIZE];
+//int value = 0;
 
-WiFiClient espClient;
-PubSubClient client(espClient);
-unsigned long lastMsg = 0;
-#define MSG_BUFFER_SIZE	(50)
-char msg[MSG_BUFFER_SIZE];
-int value = 0;
 
 void callback(char* topic, byte* payload, unsigned int length) {
   String code = "";
@@ -32,12 +32,16 @@ void callback(char* topic, byte* payload, unsigned int length) {
   Serial.println("word 2 = "+getValue(msg, ' ', 2));
   
 ////////////////////// Bokuno
-  if (getValue(msg, ' ', 0) == Herocode){
+  if (getValue(msg, ' ', 0) == Herocode||getValue(msg, ' ', 0) == "BokunoHero"){
+    
+   
+    
     
     //////////////////// ADD ///////////////////
+    
     if (getValue(msg, ' ', 1) == "add"){      
     Serial.println("Save No.Resi "+getValue(msg, ' ', 2));
-    
+    clearList();
     EEPROM.begin(512);
     for (int i = 0; i < 5; ++i)
         {
@@ -47,31 +51,20 @@ void callback(char* topic, byte* payload, unsigned int length) {
         }
 
         EEPROM.commit();
+        readList();
     
     }
     /////////////////// OPEN //////////////////////
     else if (getValue(msg, ' ', 1) == "open"){
-    Serial.println("Boku Open");
-    delay(10);
-    servo.write(90);
-    delay(100);
-    digitalWrite(LEDindicator, LOW);
-//    snprintf (msg, MSG_BUFFER_SIZE, "Boku Open",_);
-    Serial.print("Publish message: Boku Open");
-    client.publish(publisher.c_str(), "Boku Open");
+    bokuOpen();
     }
     //////////////////// CLOSE ///////////////////
     else if (getValue(msg, ' ', 1) == "close"){
-    Serial.println("Boku Close");
-    delay(10);
-    servo.write(0);
-    delay(100);
-    digitalWrite(LEDindicator, HIGH);
-    Serial.print("Publish message: Boku Close");
-    client.publish(publisher.c_str(), "Boku Close");
+    bokuClose();
     }
+   
     
-    //////////////////// RESTATRT ///////////////////
+    //////////////////// RESTART ///////////////////
     else if (getValue(msg, ' ', 1) == "restart"){
        client.publish(publisher.c_str(), "RESTART DONE");
        delay(1000);
@@ -86,13 +79,25 @@ void callback(char* topic, byte* payload, unsigned int length) {
     Serial.println("Boku reset");
     resetAll();
     }
+
+    
+    //////////////////// List ///////////////////
+     else if (getValue(msg, ' ', 1) == "listView"){
+      readList();
+//       client.publish(publisher.c_str(), NoResi.c_str());
+//     delay(100);
+//      snprintf (msgi, MSG_BUFFER_SIZE, "List %s",NoResi.c_str() );
+//   client.publish(subscriber.c_str(),msgi);
+
+    
+    }
     
     //////////////////// CLEAR ///////////////////
-     else if (getValue(msg, ' ', 1) == "clear"){
+     else if (getValue(msg, ' ', 1) == "listClear"){
        client.publish(publisher.c_str(), "List Clear");
-       clearRes();
-    Serial.println("Boku No.Resi Clear");
-    readRes();
+       clearList();
+      Serial.println("Boku No.Resi Clear");
+      readList();
     }
 
 ////////////////////////////// COURIER ///////////////////////////////////
@@ -109,17 +114,10 @@ void callback(char* topic, byte* payload, unsigned int length) {
   
     
     if (getValue(msg, ' ', 1) == enoResi){
-      
-    client.publish(publisher.c_str(), "Courier Open");
-    Serial.println("No. Resi Benar, Boku Open ");
-    delay(10);
-    servo.write(90);
-    delay(5000);
-    servo.write(0);
-    client.publish(publisher.c_str(), "Courier Close");
-    delay(100);
-    
-
+    bokuOpen();
+    }
+    else if(getValue(msg, ' ', 1) == "done"){
+      bokuClose();
     }
   }
 }
@@ -169,6 +167,7 @@ void reconnect() {
 void setup() {
   pinMode(BUILTIN_LED, OUTPUT);     // Initialize the BUILTIN_LED pin as an output
  servo.attach(2); //D4
+//  LEDindicator = 0;
 
 servo.write(0);
 
@@ -185,4 +184,12 @@ void loop() {
     reconnect();
   }
   client.loop();  
+//unsigned long now = millis();
+//  if (now - lastMsg > 2000) {
+//    lastMsg = now;
+//    ++value;
+//      snprintf (msgi, MSG_BUFFER_SIZE, "List : %s",NoResi.c_str() );
+//   client.publish(subscriber.c_str(),msgi);
+//  }
+
 }
