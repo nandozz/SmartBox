@@ -42,8 +42,9 @@ void callback(char* topic, byte* payload, unsigned int length) {
     if (getValue(msg, ' ', 1) == "add"){      
     Serial.println("Save No.Resi "+getValue(msg, ' ', 2));
     clearList();
+    int lengthmsg = getValue(msg, ' ', 2).length() > 5 ? 5 : getValue(msg, ' ', 2).length();
     EEPROM.begin(512);
-    for (int i = 0; i < 5; ++i)
+    for (int i = 0; i < lengthmsg; ++i)
         {
           EEPROM.write(106 + i, getValue(msg, ' ', 2)[i]);
           Serial.print("Wrote: ");
