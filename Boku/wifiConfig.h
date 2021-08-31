@@ -18,7 +18,7 @@ char msgi[MSG_BUFFER_SIZE];
 ////////////////////////////////////////////////////
 ////////////////////////////////////////////////////
         String BokuID = "A1234";      //Production code
-        String AP = "Boku Box";                ////
+        String AP = "Boku Box "+BokuID;                ////
         String APpass = "bokuboxA1234";             ////
 ////////////////////////////////////////////////////
 ////////////////////////////////////////////////////
@@ -36,10 +36,10 @@ String NoResi = "";
 
 
 //ESP1
-int LEDindicator = 0;
+//int LED_BUILTIN = 0;
 //int resetButton = 2;
 //ESP8266 12E
-//int LEDindicator = 2;
+//int LED_BUILTIN = 2;
 //int resetButton = 4;
 
 
@@ -50,6 +50,7 @@ void launchWeb(void);
 void setupAP(void);
 void createWebServer(void);
 void resetAll(void);
+void blinking(void);
 
 //Establishing Local server at port 80 whenever required
 ESP8266WebServer server(80);
@@ -63,8 +64,10 @@ void wifi_setting()
   WiFi.disconnect();
   EEPROM.begin(512); //Initialasing EEPROM
   delay(10);
-  pinMode(LEDindicator, OUTPUT);
-  digitalWrite(LEDindicator, HIGH);
+  pinMode(LED_BUILTIN, OUTPUT);
+  digitalWrite(LED_BUILTIN, LOW);
+//  pinMode(LED_BUILTIN, OUTPUT);
+//  digitalWrite(LED_BUILTIN, HIGH);
 //  pinMode(resetButton, INPUT);
 //  digitalWrite(resetButton, HIGH);
   Serial.println();
@@ -72,7 +75,7 @@ void wifi_setting()
   Serial.println("Startup");
 
   //---------------------------------------- Read eeprom for ssid and pass
-  Serial.println("Reading EEPROM ssid");
+//  Serial.println("Reading EEPROM ssid");
 
   String esid;
   for (int i = 0; i < 32; ++i)
@@ -82,7 +85,7 @@ void wifi_setting()
   Serial.println();
   Serial.print("SSID: ");
   Serial.println(esid);
-  Serial.println("Reading EEPROM pass");
+//  Serial.println("Reading EEPROM pass");
 
   String epass = "";
   for (int i = 32; i < 96; ++i)
@@ -253,12 +256,24 @@ void readList(){
       snprintf (msgi, MSG_BUFFER_SIZE, "List %s",NoResi.c_str() );
    client.publish(subscriber.c_str(),msgi);
 }
+
+void blinking(){
+  for(int i = 0;i<3;i++){
+
+    digitalWrite(LED_BUILTIN, HIGH);
+     delay(100);
+     digitalWrite(LED_BUILTIN, LOW);
+     delay(100);
+  }
+
+    Serial.println("Blinking LED");
+}
+
 void bokuOpen(){
   Serial.println("Boku Open");
     delay(10);
     servo.write(90);
     delay(100);
-    digitalWrite(LEDindicator, LOW);
     Serial.print("Publish message: Boku Open");
     client.publish(publisher.c_str(), "Boku Open");
 }
@@ -268,7 +283,6 @@ void bokuClose(){
     delay(10);
     servo.write(0);
     delay(100);
-    digitalWrite(LEDindicator, HIGH);
     Serial.print("Publish message: Boku Close");
     client.publish(publisher.c_str(), "Boku Close");
 }

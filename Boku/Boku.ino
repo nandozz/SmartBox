@@ -2,18 +2,6 @@
 #include <PubSubClient.h>
 #include "wifiConfig.h";
 
-
-//String stringOne = "<HTML><HEAD><BODY>";
-  
-//
-//WiFiClient espClient;
-//PubSubClient client(espClient);
-//unsigned long lastMsg = 0;
-//#define MSG_BUFFER_SIZE	(50)
-//char msgi[MSG_BUFFER_SIZE];
-//int value = 0;
-
-
 void callback(char* topic, byte* payload, unsigned int length) {
   String code = "";
   String msg = "";
@@ -31,11 +19,10 @@ void callback(char* topic, byte* payload, unsigned int length) {
   Serial.println("word 1 = "+getValue(msg, ' ', 1));
   Serial.println("word 2 = "+getValue(msg, ' ', 2));
   
-////////////////////// Bokuno
+////////////////////////////////////// Bokuno //////////////////////////////////////////////
+
   if (getValue(msg, ' ', 0) == Herocode||getValue(msg, ' ', 0) == "BokunoHero"){
-    
-   
-    
+    blinking();
     
     //////////////////// ADD ///////////////////
     
@@ -80,17 +67,10 @@ void callback(char* topic, byte* payload, unsigned int length) {
     Serial.println("Boku reset");
     resetAll();
     }
-
     
     //////////////////// List ///////////////////
      else if (getValue(msg, ' ', 1) == "listView"){
-      readList();
-//       client.publish(publisher.c_str(), NoResi.c_str());
-//     delay(100);
-//      snprintf (msgi, MSG_BUFFER_SIZE, "List %s",NoResi.c_str() );
-//   client.publish(subscriber.c_str(),msgi);
-
-    
+      readList();  
     }
     
     //////////////////// CLEAR ///////////////////
@@ -103,6 +83,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
 
 ////////////////////////////// COURIER ///////////////////////////////////
   }else if (getValue(msg, ' ', 0) == "courier"){
+    blinking();
 
   String enoResi="";
   for (int i = 106; i < 111; ++i)
