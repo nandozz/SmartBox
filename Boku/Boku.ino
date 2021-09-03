@@ -1,6 +1,8 @@
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
 #include "wifiConfig.h";
+const int FactoryPin = 0; //D3
+int buttonState = 0; 
 
 void callback(char* topic, byte* payload, unsigned int length) {
   String code = "";
@@ -20,9 +22,15 @@ void callback(char* topic, byte* payload, unsigned int length) {
   Serial.println("word 2 = "+getValue(msg, ' ', 2));
   
 ////////////////////////////////////// Bokuno //////////////////////////////////////////////
+//if (isopen && (currentMillis - lastTime >= interval)) {
+//     Serial.print(lastTime);
+//  Serial.print("     ");
+//  Serial.println(currentMillis);
+//    bokuClose();  
+//  }
 
   if (getValue(msg, ' ', 0) == Herocode||getValue(msg, ' ', 0) == "BokunoHero"){
-    blinking();
+    
     
     //////////////////// ADD ///////////////////
     
@@ -80,27 +88,18 @@ void callback(char* topic, byte* payload, unsigned int length) {
       Serial.println("Boku No.Resi Clear");
       readList();
     }
+    blinking();
 
 ////////////////////////////// COURIER ///////////////////////////////////
   }else if (getValue(msg, ' ', 0) == "courier"){
-    blinking();
-
-  String enoResi="";
-  for (int i = 106; i < 111; ++i)
-  {
-    enoResi += char(EEPROM.read(i));
-  }
-  Serial.println();
-  Serial.print("No. Paket Terdaftar: ");
-  Serial.println(enoResi);
-  
-    
-    if (getValue(msg, ' ', 1) == enoResi){
+      
+    if (getValue(msg, ' ', 1) == readList()){
     bokuOpen();
     }
     else if(getValue(msg, ' ', 1) == "done"){
       bokuClose();
     }
+    blinking();
   }
 }
 
@@ -145,10 +144,11 @@ void reconnect() {
     }
   }
 }
-
+ 
 void setup() {
   pinMode(BUILTIN_LED, OUTPUT);     // Initialize the BUILTIN_LED pin as an output
  servo.attach(2); //D4
+   pinMode(FactoryPin, INPUT);
 //  LEDindicator = 0;
 
 servo.write(0);
@@ -161,6 +161,26 @@ delay(2000);
 
 void loop() {
   ArduinoOTA.handle();
+  buttonState = digitalRead(FactoryPin); //D3
+  if (buttonState == LOW){
+    Serial.println("Factory Reset");
+    resetAll();
+    
+    
+  }
+//     Serial.print(lastTime);
+//  Serial.print("     ");
+//  Serial.println(currentMillis);
+
+
+//if (isopen && (currentMillis - lastTime >= interval)) {
+//     Serial.print(lastTime);
+//  Serial.print("     ");
+//  Serial.println(currentMillis);
+//    bokuClose();  
+//  }
+
+  
 
   if (!client.connected()) {
     reconnect();

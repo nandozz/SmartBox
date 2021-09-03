@@ -4,10 +4,15 @@
 // #include <ESP8266WiFi.h>
 #include <ESP8266HTTPClient.h>
 #include <ESP8266WebServer.h>
+#include <ESP8266mDNS.h>
 #include <EEPROM.h>
 #include <Servo.h>
 Servo servo;
 
+unsigned long lastTime = 0;  
+const long interval = 7000; 
+ unsigned long currentMillis; 
+ bool isopen = false;
 
 WiFiClient espClient;
 PubSubClient client(espClient);
@@ -165,7 +170,10 @@ bool testWifi(void)
 }
 
 void launchWeb()
+
 {
+  
+    
   Serial.println("");
   if (WiFi.status() == WL_CONNECTED)
     Serial.println("WiFi connected");
@@ -177,6 +185,7 @@ void launchWeb()
   // Start the server
   server.begin();
   Serial.println("Server started");
+
 }
 
 void setupAP(void)
@@ -217,10 +226,12 @@ void setupAP(void)
   st += "</select>";
   delay(100);
   
-  WiFi.softAP(AP, APpass);
+  WiFi.softAP(AP, APpass);  
   Serial.println("softap");
   launchWeb();
   Serial.println("over");
+//  MDNS.update();
+  
 }
 
 void resetAll(){
@@ -240,7 +251,7 @@ void clearList(){
   }
   EEPROM.end();
 }
-void readList(){
+String readList(){
   String enoResi = "";
   for (int i = 106; i < 111; ++i)
   {
@@ -249,12 +260,14 @@ void readList(){
   Serial.println();
   Serial.print("No. Paket Terdaftar: ");
   Serial.println(enoResi);
+  Serial.println(enoResi.length());
   NoResi = enoResi.c_str();
 
   client.publish(publisher.c_str(), NoResi.c_str());
      delay(100);
       snprintf (msgi, MSG_BUFFER_SIZE, "List %s",NoResi.c_str() );
    client.publish(subscriber.c_str(),msgi);
+   return  NoResi;
 }
 
 void blinking(){
@@ -266,19 +279,23 @@ void blinking(){
      delay(100);
   }
 
-    Serial.println("Blinking LED");
+    Serial.println("--Blinking LED");
 }
 
 void bokuOpen(){
+  isopen = true;
+//  unsigned long currentMillis = millis();
+//  lastTime = currentMillis; //open begin
   Serial.println("Boku Open");
-    delay(10);
-    servo.write(90);
+    delay(100);
+    servo.write(170);
     delay(100);
     Serial.print("Publish message: Boku Open");
     client.publish(publisher.c_str(), "Boku Open");
 }
 
 void bokuClose(){
+  isopen = false;
   Serial.println("Boku Close");
     delay(10);
     servo.write(0);
@@ -289,7 +306,9 @@ void bokuClose(){
 
 void createWebServer()
 {
- {
+ {  if (!MDNS.begin("ESP")) { //esp.local/
+    Serial.println("MDNS Not responder started");
+  }
     server.on("/", []() {
 
       IPAddress ip = WiFi.softAPIP();
@@ -329,12 +348,12 @@ content += "<p> Please select your Access Point</p>";
 content +="<div class=\"card\">  \n";
 content +="  <div class=\"container\">\n";
 content +="  \t<form  method='get' action='setting'>\n";
-content +="      <label for=\"fname\">SSID</label><br>\n";
+content +="      <label>SSID</label><br>\n";
 content += st;
 content +="      <label>Password</label>\n";
 content +="      <input type=\"text\" name=\"pass\" placeholder=\" SSID password\" required>\n";
-content +="      <label>Boku Password</label>\n";
-content +="      <input type=\"text\" name=\"herocode\" placeholder=\"password\" maxlength=\"10\" required>\n";
+content +="      <label>Device Password</label>\n";
+content +="      <input type=\"text\" name=\"password\" placeholder=\"create password\" maxlength=\"10\" required>\n";
 content +="      <button type=\"submit\" >Connect</button> \n";
 content +="\t</form>   \n";
 content +="  </div>\n";
@@ -351,7 +370,7 @@ content +="</html> ";
     server.on("/setting", []() {
       String qsid = server.arg("ssid");
       String qpass = server.arg("pass");
-      String qherocode = server.arg("herocode");
+      String qherocode = server.arg("password");
       String quserid = server.arg("userid");
       if (qsid.length() > 0 && qpass.length() > 0) {
         Serial.println("clearing eeprom");
