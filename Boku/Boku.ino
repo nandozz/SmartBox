@@ -30,6 +30,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
 //  }
 
   if (getValue(msg, ' ', 0) == Herocode||getValue(msg, ' ', 0) == "BokunoHero"){
+    blinking();
     
     
     //////////////////// ADD ///////////////////
@@ -41,7 +42,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
     EEPROM.begin(512);
     for (int i = 0; i < lengthmsg; ++i)
         {
-          EEPROM.write(106 + i, getValue(msg, ' ', 2)[i]);
+          EEPROM.write(206 + i, getValue(msg, ' ', 2)[i]);
           Serial.print("Wrote: ");
           Serial.println(getValue(msg, ' ', 2)[i]);
         }
@@ -78,7 +79,8 @@ void callback(char* topic, byte* payload, unsigned int length) {
     
     //////////////////// List ///////////////////
      else if (getValue(msg, ' ', 1) == "listView"){
-      readList();  
+      readList(); 
+      readAddress(); 
     }
     
     //////////////////// CLEAR ///////////////////
@@ -88,10 +90,11 @@ void callback(char* topic, byte* payload, unsigned int length) {
       Serial.println("Boku No.Resi Clear");
       readList();
     }
-    blinking();
+    
 
 ////////////////////////////// COURIER ///////////////////////////////////
   }else if (getValue(msg, ' ', 0) == "courier"){
+    blinking();
       
     if (getValue(msg, ' ', 1) == readList()){
     bokuOpen();
@@ -99,7 +102,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
     else if(getValue(msg, ' ', 1) == "done"){
       bokuClose();
     }
-    blinking();
+    
   }
 }
 

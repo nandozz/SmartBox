@@ -17,7 +17,7 @@ const long interval = 7000;
 WiFiClient espClient;
 PubSubClient client(espClient);
 unsigned long lastMsg = 0;
-#define MSG_BUFFER_SIZE  (50)
+#define MSG_BUFFER_SIZE  (150)
 char msgi[MSG_BUFFER_SIZE];
 
 ////////////////////////////////////////////////////
@@ -38,6 +38,7 @@ String publisher = BokuID+"/Boku";
 String subscriber = "Boku/"+BokuID;
 String Herocode = "";
 String NoResi = "";
+String Address = "";
 
 
 //ESP1
@@ -81,7 +82,6 @@ void wifi_setting()
 
   //---------------------------------------- Read eeprom for ssid and pass
 //  Serial.println("Reading EEPROM ssid");
-
   String esid;
   for (int i = 0; i < 32; ++i)
   {
@@ -90,8 +90,8 @@ void wifi_setting()
   Serial.println();
   Serial.print("SSID: ");
   Serial.println(esid);
+  
 //  Serial.println("Reading EEPROM pass");
-
   String epass = "";
   for (int i = 32; i < 96; ++i)
   {
@@ -100,6 +100,8 @@ void wifi_setting()
   Serial.print("PASS: ");
   Serial.println(epass);
 
+
+//  Serial.println("Reading EEPROM herocode");
   String eherocode = "";
   for (int i = 96; i < 106; ++i)
   {
@@ -109,15 +111,27 @@ void wifi_setting()
   Serial.println(eherocode);
   Herocode = eherocode.c_str();
 
-  String enoResi = "";
-  for (int i = 106; i < 111; ++i)
-  {
-    enoResi += char(EEPROM.read(i));
-  }
-  Serial.println();
-  Serial.print("No. Paket Terdaftar: ");
-  Serial.println(enoResi);
-  NoResi = enoResi.c_str();
+//  Serial.println("Reading EEPROM address");
+//  String eaddress = "";
+//  for (int i = 106; i < 206; ++i)
+//  {
+//    eaddress += char(EEPROM.read(i));
+//  }
+//  Serial.println();
+//  Serial.print("Address: ");
+//  Serial.println(eaddress);
+//  Address = eaddress.c_str();
+
+//  Serial.println("Reading EEPROM noResi");
+//  String enoResi = "";
+//  for (int i = 206; i < 211; ++i)
+//  {
+//    enoResi += char(EEPROM.read(i));
+//  }
+//  Serial.println();
+//  Serial.print("No. Paket Terdaftar: ");
+//  Serial.println(enoResi);
+//  NoResi = enoResi.c_str();
 
 
   WiFi.begin(esid.c_str(), epass.c_str());
@@ -246,14 +260,14 @@ void resetAll(){
 void clearList(){
   EEPROM.begin(512);
   // write a 0 to all 512 bytes of the EEPROM
-  for (int i = 106; i < 512; i++) {
+  for (int i = 206; i < 512; i++) {
     EEPROM.write(i, 0);
   }
   EEPROM.end();
 }
 String readList(){
   String enoResi = "";
-  for (int i = 106; i < 111; ++i)
+  for (int i = 206; i < 211; ++i)
   {
     enoResi += char(EEPROM.read(i));
   }
@@ -268,6 +282,28 @@ String readList(){
       snprintf (msgi, MSG_BUFFER_SIZE, "List %s",NoResi.c_str() );
    client.publish(subscriber.c_str(),msgi);
    return  NoResi;
+}
+
+String readAddress(){
+  String eaddress = "";
+  for (int i = 106; i < 206; ++i)
+  {
+    eaddress += char(EEPROM.read(i));
+  }
+  Serial.println();
+  Serial.print("Address: ");
+  Serial.println(eaddress);
+  Address = eaddress.c_str();
+
+  client.publish(publisher.c_str(), Address.c_str());
+     delay(100);
+      snprintf (msgi, MSG_BUFFER_SIZE, "Address %s",Address.c_str() );
+   client.publish(subscriber.c_str(),msgi);
+   delay(100);
+   
+   Address = "";
+   return  Address;
+  
 }
 
 void blinking(){
@@ -352,8 +388,15 @@ content +="      <label>SSID</label><br>\n";
 content += st;
 content +="      <label>Password</label>\n";
 content +="      <input type=\"text\" name=\"pass\" placeholder=\" SSID password\" required>\n";
+
+content +="      <label>Device Address</label>\n";
+content +="      <input type=\"text\" name=\"address\" placeholder=\"your address\" maxlength=\"100\" required>\n";
+
+
 content +="      <label>Device Password</label>\n";
 content +="      <input type=\"text\" name=\"password\" placeholder=\"create password\" maxlength=\"10\" required>\n";
+
+
 content +="      <button type=\"submit\" >Connect</button> \n";
 content +="\t</form>   \n";
 content +="  </div>\n";
@@ -371,7 +414,7 @@ content +="</html> ";
       String qsid = server.arg("ssid");
       String qpass = server.arg("pass");
       String qherocode = server.arg("password");
-      String quserid = server.arg("userid");
+      String qaddress = server.arg("address");
       if (qsid.length() > 0 && qpass.length() > 0) {
         Serial.println("clearing eeprom");
         for (int i = 0; i < 106; ++i) {
@@ -383,7 +426,7 @@ content +="</html> ";
         Serial.println("");
         Serial.println(qherocode);
         Serial.println("");
-        Serial.println(quserid);
+        Serial.println(qaddress);
         Serial.println("");
 
         Serial.println("writing eeprom ssid:");
@@ -406,6 +449,13 @@ content +="</html> ";
           EEPROM.write(96 + i, qherocode[i]);
           Serial.print("Wrote: ");
           Serial.println(qherocode[i]);
+        }
+        Serial.println("writing eeprom address:");
+        for (int i = 0; i < qaddress.length(); ++i)
+        {
+          EEPROM.write(106 + i, qaddress[i]);
+          Serial.print("Wrote: ");
+          Serial.println(qaddress[i]);
         }
 
         EEPROM.commit();

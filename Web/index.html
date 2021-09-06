@@ -1,0 +1,85 @@
+<html>
+   <head>
+      <title>JavaScript MQTT WebSocket Example</title>
+	  <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.js" type="text/javascript">
+	 </script>
+	 <script type = "text/javascript" language = "javascript">
+		var mqtt;
+		var reconnectTimeout = 2000;
+		var host="broker.mqttdashboard.com"; //change this
+
+		var port=8000;
+
+		function onFailure(message){
+			console.log("Connection Failed");
+			setTimeout(MQTTconnect, reconnectTimeout);
+		}
+
+
+		function onMessagaeArrived(msg){
+			var out_msg="Received : "+msg.payloadString+"<br>";
+			out_msg=out_msg+"Message received Topic "+msg.destinationName;
+			console.log("Receive = "+out_msg);
+		}
+
+		function alertInfo(){
+			alert("Device Open");
+		}
+
+
+		function onOpen() {
+			// Once a connection has been made, make a subscription and send a message.
+			var devID = document.getElementById("devID").value;
+			var code = document.getElementById("code").value;
+			code = code.substring(code.length-5, code.length);
+
+
+			// console.log("Open - "+code);
+			mqtt.subscribe("Boku/"+devID);
+			message = new Paho.MQTT.Message("courier "+code);
+			message.destinationName = "Boku/"+devID;
+			mqtt.send(message);
+		}
+		
+		function onConnect() {
+			// Once a connection has been made, make a subscription and send a message.
+			var devID = document.getElementById("devID").value;
+
+
+			console.log("Connect to "+devID);
+			mqtt.subscribe("Boku/"+devID);
+			message = new Paho.MQTT.Message("");
+			message.destinationName = "Boku/"+devID;
+	
+		}
+	  function MQTTconnect() {
+		// console.log("connecting to "+ host +" "+ port);
+		mqtt = new Paho.MQTT.Client(host,port,"clientjs");
+		//document.write("connecting to "+ host);
+		var options = {
+			//useSSL:true,
+			timeout: 3,
+			onSuccess: onConnect,
+			onFailure: onFailure,
+		 };
+		 mqtt.onMessagaeArrived = onMessagaeArrived;
+
+		mqtt.connect(options); //connect
+		}
+
+	  </script>
+   </head>
+     <body>
+   <h1>Boku Box</h1>
+   <form>
+     <label for="DeviceID">DeviceID : </label><input type="text" id="devID" onkeyup="MQTTconnect();">
+     <br> <br>
+     <label for="code">Code : </label><input type="text" id="code">
+     <br> <br>
+     <button type="button" onclick="onOpen(); alertInfo(); " >Open</button>
+   </form>
+ 	<!-- <script>
+	MQTTconnect();
+	</script> -->
+   </body>	
+</html> 

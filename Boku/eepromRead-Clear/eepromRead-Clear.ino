@@ -13,15 +13,15 @@ int address = 0;
 byte value;
 
 void setup() {
-  // initialize serial and wait for port to open:
-  Serial.begin(115200);
+  Serial.begin(115200);  
   EEPROM.begin(512);
-  // write a 0 to all 512 bytes of the EEPROM
-  for (int i = 0; i < 512; i++) {
-    EEPROM.write(i, 0);
-  }
-
- Serial.println("EEPROM CLEAN");
+  
+//  // write a 0 to all 512 bytes of the EEPROM
+//  for (int i = 0; i < 512; i++) {
+//    EEPROM.write(i, 0);
+//  }
+//
+// Serial.println("EEPROM CLEAN");
  
 }
   
@@ -57,8 +57,17 @@ void loop() {
   Serial.println(eherocode);
 //  Herocode = eherocode.c_str();
 
+String eaddress = "";
+  for (int i = 106; i < 206; ++i)
+  {
+    eaddress += char(EEPROM.read(i));
+  }
+  Serial.println();
+  Serial.print("Address: ");
+  Serial.println(eaddress);
+
   String enoResi = "";
-  for (int i = 106; i < 111; ++i)
+  for (int i = 206; i < 211; ++i)
   {
     enoResi += char(EEPROM.read(i));
   }
