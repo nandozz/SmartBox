@@ -280,7 +280,7 @@ String readList(){
   client.publish(publisher.c_str(), NoResi.c_str());
      delay(100);
       snprintf (msgi, MSG_BUFFER_SIZE, "List %s",NoResi.c_str() );
-   client.publish(subscriber.c_str(),msgi);
+   client.publish(publisher.c_str(),msgi);
    return  NoResi;
 }
 

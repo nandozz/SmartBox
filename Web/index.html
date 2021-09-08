@@ -82,8 +82,11 @@
 		}
 	  function MQTTconnect() {
 			// console.log("connecting to "+ host +" "+ port);
-			mqtt = new Paho.MQTT.Client(host,port,"boku" + parseInt(Math.random() * 100, 10));
+			mqtt = new Paho.MQTT.Client(host,port,"box" + parseInt(Math.random() * 100, 10));
 			console.log("Client ID = boku-" + parseInt(Math.random() * 100, 10));
+
+
+			
 		
 		//document.write("connecting to "+ host);
 		var options = {
@@ -100,11 +103,11 @@
 	  </script>
    </head>
      <body>
-   <h1>Boku Box</h1>
+   <h1>Box</h1>
    <form>
-     <label for="devID">DeviceID : </label><input type="text" id="devID" > <!-- onkeyup="MQTTconnect();" -->
+     <label for="devID">Box ID : </label><input type="text" id="devID" > <!-- onkeyup="MQTTconnect();" -->
      <br> <br>
-     <label for="code">Code : </label><input type="text" id="code">
+     <label for="code">Open Code : </label><input type="text" id="code">
      <br> <br>
      <button type="button" onclick="onOpen(); confirmInfo(); " >Open</button>
    </form>
