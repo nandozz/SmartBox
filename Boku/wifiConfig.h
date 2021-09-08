@@ -1,4 +1,4 @@
-
+//new
 #include "Utilities.h"
 #include "OTA.h";
 // #include <ESP8266WiFi.h>
@@ -152,12 +152,19 @@ void wifi_setting()
 
   Serial.println();
   Serial.println("Waiting.");
-  
+  int h = 0;
   while ((WiFi.status() != WL_CONNECTED))
-  {
+  { 
     Serial.print(".");
     delay(100);
     server.handleClient();
+    delay(500);
+    h++;
+    if ( h > 600 ){
+      ESP.restart();
+    }
+    
+    
   }
 
 }
@@ -169,7 +176,7 @@ bool testWifi(void)
 {
   int c = 0;
   Serial.println("Waiting for Wifi to connect");
-  while ( c < 20 ) {
+  while ( c < 40 ) {
     if (WiFi.status() == WL_CONNECTED)
     { 
       return true;
@@ -186,8 +193,6 @@ bool testWifi(void)
 void launchWeb()
 
 {
-  
-    
   Serial.println("");
   if (WiFi.status() == WL_CONNECTED)
     Serial.println("WiFi connected");
@@ -280,7 +285,7 @@ String readList(){
   client.publish(publisher.c_str(), NoResi.c_str());
      delay(100);
       snprintf (msgi, MSG_BUFFER_SIZE, "List %s",NoResi.c_str() );
-   client.publish(publisher.c_str(),msgi);
+   client.publish(subscriber.c_str(),msgi);
    return  NoResi;
 }
 
@@ -324,7 +329,7 @@ void bokuOpen(){
 //  lastTime = currentMillis; //open begin
   Serial.println("Boku Open");
     delay(100);
-    servo.write(170);
+    servo.write(160);
     delay(100);
     Serial.print("Publish message: Boku Open");
     client.publish(publisher.c_str(), "Boku Open");

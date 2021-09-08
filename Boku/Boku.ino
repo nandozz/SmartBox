@@ -144,6 +144,7 @@ void reconnect() {
       Serial.println(" try again in 5 seconds");
       // Wait 5 seconds before retrying
       delay(5000);
+      //add reset func if connection failed
     }
   }
 }
