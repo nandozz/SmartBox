@@ -138,13 +138,13 @@ void wifi_setting()
   if (testWifi())
   {
   OTAfunc(esid.c_str(), epass.c_str(),"Boku-esp");
-      //Connect to Bot
-    
+  blinking();
     Serial.println("Succesfully Connected!!!");
     return;
   }
   else
-  {
+  {blinking();
+  blinking();
     Serial.println("Turning the HotSpot On");
     launchWeb();
     setupAP();// Setup HotSpot
@@ -309,9 +309,9 @@ String readAddress(){
 void blinking(){
   for(int i = 0;i<3;i++){
 
-    digitalWrite(LED_BUILTIN, HIGH);
+    digitalWrite(LED_BUILTIN, LOW);
      delay(100);
-     digitalWrite(LED_BUILTIN, LOW);
+     digitalWrite(LED_BUILTIN, HIGH);
      delay(100);
   }
 
@@ -393,8 +393,8 @@ content +="      <label>Device Address</label>\n";
 content +="      <input type=\"text\" name=\"address\" placeholder=\"your address\" maxlength=\"100\" required>\n";
 
 
-content +="      <label>Device Password</label>\n";
-content +="      <input type=\"text\" name=\"password\" placeholder=\"create password\" maxlength=\"10\" required>\n";
+content +="      <label>Device Password (max 10 character)</label>\n";
+content +="      <input type=\"text\" name=\"password\" placeholder=\"create new password\" maxlength=\"10\" required>\n";
 
 
 content +="      <button type=\"submit\" >Connect</button> \n";

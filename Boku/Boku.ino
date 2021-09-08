@@ -7,7 +7,7 @@ int buttonState = 0;
 void callback(char* topic, byte* payload, unsigned int length) {
   String code = "";
   String msg = "";
-  Serial.print("Message arrived [");
+  Serial.print("\nMessage arrived [");
   Serial.print(topic);
   Serial.print("] ");
   for (int i = 0; i < length; i++) {
@@ -170,31 +170,11 @@ void loop() {
     resetAll();
     
     
-  }
-//     Serial.print(lastTime);
-//  Serial.print("     ");
-//  Serial.println(currentMillis);
-
-
-//if (isopen && (currentMillis - lastTime >= interval)) {
-//     Serial.print(lastTime);
-//  Serial.print("     ");
-//  Serial.println(currentMillis);
-//    bokuClose();  
-//  }
-
-  
+  } 
 
   if (!client.connected()) {
     reconnect();
   }
   client.loop();  
-//unsigned long now = millis();
-//  if (now - lastMsg > 2000) {
-//    lastMsg = now;
-//    ++value;
-//      snprintf (msgi, MSG_BUFFER_SIZE, "List : %s",NoResi.c_str() );
-//   client.publish(subscriber.c_str(),msgi);
-//  }
 
 }
