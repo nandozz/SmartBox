@@ -3,16 +3,17 @@
       <title>JavaScript MQTT WebSocket Example</title>
 	  <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.js" type="text/javascript">
 	 </script>
+
 	 <script type = "text/javascript" language = "javascript">
 		var mqtt;
-		var reconnectTimeout = 5000;
+		var reconnectTimeout = 2000;
 		var host="broker.mqttdashboard.com"; //change this
-
 		var port=8000;
 
 		function onFailure(message){
 			console.log("Connection Failed");
 			setTimeout(MQTTconnect, reconnectTimeout);
+	
 		}
 
 
@@ -72,15 +73,18 @@
 			var devID = document.getElementById("devID").value;
 
 
-			console.log("Connect to "+devID);
+			console.log("Web Connected");
 			mqtt.subscribe("Boku/"+devID);
 			message = new Paho.MQTT.Message("");
 			message.destinationName = "Boku/"+devID;
-	
+			
+			
 		}
 	  function MQTTconnect() {
-		// console.log("connecting to "+ host +" "+ port);
-		mqtt = new Paho.MQTT.Client(host,port,"boku-ABC"+);
+			// console.log("connecting to "+ host +" "+ port);
+			mqtt = new Paho.MQTT.Client(host,port,"boku" + parseInt(Math.random() * 100, 10));
+			console.log("Client ID = boku-" + parseInt(Math.random() * 100, 10));
+		
 		//document.write("connecting to "+ host);
 		var options = {
 			//useSSL:true,
@@ -98,14 +102,14 @@
      <body>
    <h1>Boku Box</h1>
    <form>
-     <label for="DeviceID">DeviceID : </label><input type="text" id="devID" onkeyup="MQTTconnect();">
+     <label for="devID">DeviceID : </label><input type="text" id="devID" > <!-- onkeyup="MQTTconnect();" -->
      <br> <br>
      <label for="code">Code : </label><input type="text" id="code">
      <br> <br>
      <button type="button" onclick="onOpen(); confirmInfo(); " >Open</button>
    </form>
- 	<!-- <script>
+ 	<script>
 	MQTTconnect();
-	</script> -->
+	</script>
    </body>	
 </html> 
