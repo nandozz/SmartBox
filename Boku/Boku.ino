@@ -48,7 +48,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
         }
 
         EEPROM.commit();
-        readList();
+        readList(1);
     
     }
     /////////////////// OPEN //////////////////////
@@ -63,7 +63,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
     
     //////////////////// RESTART ///////////////////
     else if (getValue(msg, ' ', 1) == "restart"){
-       client.publish(publisher.c_str(), "RESTART DONE");
+       client.publish(pub_user.c_str(), "RESTART DONE");
        delay(1000);
     Serial.println("Boku restart");
     ESP.restart();
@@ -71,7 +71,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
     
     //////////////////// RESET ///////////////////
     else if (getValue(msg, ' ', 1) == "reset"){
-       client.publish(publisher.c_str(), "RESET DONE");
+       client.publish(pub_user.c_str(), "RESET DONE");
        delay(1000);
     Serial.println("Boku reset");
     resetAll();
@@ -79,13 +79,13 @@ void callback(char* topic, byte* payload, unsigned int length) {
     
     //////////////////// List ///////////////////
      else if (getValue(msg, ' ', 1) == "listView"){
-      readList(); 
+      readList(1); 
       readAddress(); 
     }
     
     //////////////////// CLEAR ///////////////////
      else if (getValue(msg, ' ', 1) == "listClear"){
-       client.publish(publisher.c_str(), "List Clear");
+       client.publish(pub_user.c_str(), "List Clear");
        clearList();
       Serial.println("Boku No.Resi Clear");
       readList();
@@ -96,8 +96,11 @@ void callback(char* topic, byte* payload, unsigned int length) {
   }else if (getValue(msg, ' ', 0) == "courier"){
     blinking();
       
-    if (getValue(msg, ' ', 1) == readList()){
+    if (getValue(msg, ' ', 1) == readList(0)){
     bokuOpen();
+    }
+    else if(getValue(msg, ' ', 1) == "ping"){
+     readAddress();
     }
     else if(getValue(msg, ' ', 1) == "done"){
       bokuClose();
@@ -135,7 +138,7 @@ void reconnect() {
     if (client.connect(clientId.c_str())) {
       Serial.println("connected");
       // Once connected, publish an announcement...
-      client.publish(publisher.c_str(), "Hello, Boku");
+      client.publish(pub_user.c_str(), "Hello, Boku");
       // ... and resubscribe
       client.subscribe(subscriber.c_str());
     } else {

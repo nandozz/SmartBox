@@ -34,8 +34,9 @@ int statusCode;
 String st;
 String content;
 const char* mqtt_server = "broker.hivemq.com";
-String publisher = BokuID+"/Boku";
-String subscriber = "Boku/"+BokuID;
+String pub_user = "Boku/user/"+BokuID;
+String pub_courier = "Boku/courier/"+BokuID;
+String subscriber = "Boku/+/"+BokuID;
 String Herocode = "";
 String NoResi = "";
 String Address = "";
@@ -110,28 +111,6 @@ void wifi_setting()
   Serial.print("Herocode: ");
   Serial.println(eherocode);
   Herocode = eherocode.c_str();
-
-//  Serial.println("Reading EEPROM address");
-//  String eaddress = "";
-//  for (int i = 106; i < 206; ++i)
-//  {
-//    eaddress += char(EEPROM.read(i));
-//  }
-//  Serial.println();
-//  Serial.print("Address: ");
-//  Serial.println(eaddress);
-//  Address = eaddress.c_str();
-
-//  Serial.println("Reading EEPROM noResi");
-//  String enoResi = "";
-//  for (int i = 206; i < 211; ++i)
-//  {
-//    enoResi += char(EEPROM.read(i));
-//  }
-//  Serial.println();
-//  Serial.print("No. Paket Terdaftar: ");
-//  Serial.println(enoResi);
-//  NoResi = enoResi.c_str();
 
 
   WiFi.begin(esid.c_str(), epass.c_str());
@@ -270,22 +249,22 @@ void clearList(){
   }
   EEPROM.end();
 }
-String readList(){
+String readList(int mode = 0){
   String enoResi = "";
   for (int i = 206; i < 211; ++i)
   {
     enoResi += char(EEPROM.read(i));
   }
   Serial.println();
-  Serial.print("No. Paket Terdaftar: ");
-  Serial.println(enoResi);
+  Serial.print("No. Paket : ");
+  Serial.print(enoResi+" ");
   Serial.println(enoResi.length());
   NoResi = enoResi.c_str();
-
-  client.publish(publisher.c_str(), NoResi.c_str());
-     delay(100);
-      snprintf (msgi, MSG_BUFFER_SIZE, "List %s",NoResi.c_str() );
-   client.publish(subscriber.c_str(),msgi);
+  if (mode == 1){  
+    snprintf (msgi, MSG_BUFFER_SIZE, ("List %s",NoResi.c_str() ));
+    client.publish(pub_user.c_str(),msgi);
+      delay(100);
+  }
    return  NoResi;
 }
 
@@ -300,12 +279,11 @@ String readAddress(){
   Serial.println(eaddress);
   Address = eaddress.c_str();
 
-  client.publish(publisher.c_str(), Address.c_str());
-     delay(100);
+
       snprintf (msgi, MSG_BUFFER_SIZE, "Address %s",Address.c_str() );
-   client.publish(subscriber.c_str(),msgi);
-   delay(100);
-   
+   client.publish(pub_user.c_str(),msgi);
+      delay(100);
+   client.publish(pub_courier.c_str(),msgi);   
    Address = "";
    return  Address;
   
@@ -320,29 +298,27 @@ void blinking(){
      delay(100);
   }
 
-    Serial.println("--Blinking LED");
+    Serial.println("--Blinking LED--");
 }
 
 void bokuOpen(){
   isopen = true;
 //  unsigned long currentMillis = millis();
 //  lastTime = currentMillis; //open begin
-  Serial.println("Boku Open");
+  Serial.println("Box Open");
     delay(100);
     servo.write(160);
     delay(100);
-    Serial.print("Publish message: Boku Open");
-    client.publish(publisher.c_str(), "Boku Open");
+    client.publish(pub_courier.c_str(), "Box Open");
 }
 
 void bokuClose(){
   isopen = false;
-  Serial.println("Boku Close");
+  Serial.println("Box Close");
     delay(10);
     servo.write(0);
     delay(100);
-    Serial.print("Publish message: Boku Close");
-    client.publish(publisher.c_str(), "Boku Close");
+    client.publish(pub_courier.c_str(), "Box Close");
 }
 
 void createWebServer()
