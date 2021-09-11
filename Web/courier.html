@@ -10,33 +10,42 @@
 		var host="broker.mqttdashboard.com"; //change this
 		var port=8000;
 
+		window.addEventListener('load',()=>{
+				// const params = (new URL(document.location)).searchParams;
+				// const name = params.get('name');
+
+				const name = localStorage.getItem('NAME');
+				document.getElementById('devID').innerHTML = name;
+			})
+
 		
 		function confirmInfo(){
 			var txt;
+			const name = localStorage.getItem('NAME');
   if (confirm("Check the BOX, is it open?,\nClick OK after put the packege")) {
     txt = "You pressed OK!";
-    var devID = document.getElementById("devID").value;
+    // var devID = document.getElementById("devID").value;
 			var code = document.getElementById("code").value;
 			code = code.substring(code.length-5, code.length);
 
 
 			// console.log("Open - "+code);
-			mqtt.subscribe("Boku/courier/"+devID);
+			mqtt.subscribe("Boku/courier/"+name);
 			message = new Paho.MQTT.Message("courier done");
-			message.destinationName = "Boku/courier/"+devID;
+			message.destinationName = "Boku/courier/"+name;
 			mqtt.send(message);
   } else {
     txt = "You pressed Cancel!";
 		txt = "You pressed OK!";
-    var devID = document.getElementById("devID").value;
+    // var devID = document.getElementById("devID").value;
 			var code = document.getElementById("code").value;
 			code = code.substring(code.length-5, code.length);
 
 
 			// console.log("Open - "+code);
-			mqtt.subscribe("Boku/courier/"+devID);
+			mqtt.subscribe("Boku/courier/"+name);
 			message = new Paho.MQTT.Message("courier done");
-			message.destinationName = "Boku/courier/"+devID;
+			message.destinationName = "Boku/courier/"+name;
 			mqtt.send(message);
   }
 		}
@@ -45,14 +54,15 @@
 
 		function onOpen() {
 			// Once a connection has been made, make a subscription and send a message.
-			var devID = document.getElementById("devID").value;
+			const name = localStorage.getItem('NAME');
+			// var devID = document.getElementById("devID").value;
 			var code = document.getElementById("code").value;
 			code = code.substring(code.length-5, code.length);
 
 			// console.log("Open - "+code);
-			mqtt.subscribe("Boku/courier/"+devID);
+			mqtt.subscribe("Boku/courier/"+name);
 			message = new Paho.MQTT.Message("courier "+code);
-			message.destinationName = "Boku/courier/"+devID;
+			message.destinationName = "Boku/courier/"+name;
 			mqtt.send(message);
 		}
 		
@@ -77,12 +87,13 @@
 		
 	 	function onConnect() {
 	  // Once a connection has been made, make a subscription and send a message.
-      
-    var devID = document.getElementById("devID").value;
-		console.log("Connected to "+"A1234");
-		mqtt.subscribe("Boku/courier/"+"A1234");
+		// readDevID();
+		const name = localStorage.getItem('NAME');
+    // var devID = document.getElementById("devID").value;
+		console.log("Connected to "+name);
+		mqtt.subscribe("Boku/courier/"+name);
 		message = new Paho.MQTT.Message("courier ping");
-		message.destinationName = "Boku/courier/"+"A1234";
+		message.destinationName = "Boku/courier/"+name;
 		message.retained=true;
 		mqtt.send(message);
 	  }
@@ -104,18 +115,31 @@
 		mqtt.connect(options); //connect
 		}
 
+		// function readDevID(){
+		// 	window.addEventListener('load',()=>{
+		// 		const params = (new URL(document.location)).searchParams;
+		// 		const name = params.get('name');
+
+		// 		document.getElementById('devID').innerHTML = name;
+		// 	})
+		// }
+
 	  </script>
    </head>
      <body>
    <h1>Box</h1>
-   <form>
-     <label for="devID">Box ID : </label><input type="text" id="devID" > <!-- onkeyup="MQTTconnect();" -->
-     <br> <br>
+	 <br>
+	 <br>
+	 
+	 <label for="devID">Box ID : </label><label type="text" id="devID" > </label> <!-- onkeyup="MQTTconnect();" -->
+	 <br> <br>
+	 <label id="sub">subscribe : </label>
+	 <br>
+	 <br>
      <label for="code">Open Code : </label><input type="text" id="code">
      <br> <br>
      <button type="button" onclick="onOpen(); confirmInfo(); " >Open</button>
-   </form>
-	 <label id="sub">subscribe : </label>
+   
  	<script>
 	MQTTconnect();
 	</script>

@@ -1,0 +1,29 @@
+<!-- !https://www.youtube.com/watch?v=0eV-tf-W2rQ&t=353s -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+
+  <script type = "text/javascript" language = "javascript">
+    function handleSubmit(){
+
+      const name = document.getElementById('name').value;
+
+      localStorage.setItem("NAME",name);
+      return;
+    }
+  </script>
+</head>
+<body>
+
+  <form action="courier.html" method="GET">
+    <label for="devID">Device ID</label><br>
+    <input type="text" id="name" name="name" placeholder="Input Device ID">
+    <button type="submit" onclick="handleSubmit()">Submit</button>
+  </form>
+  
+</body>
+</html>
