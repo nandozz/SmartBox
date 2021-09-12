@@ -261,7 +261,7 @@ String readList(int mode = 0){
   Serial.println(enoResi.length());
   NoResi = enoResi.c_str();
   if (mode == 1){  
-    snprintf (msgi, MSG_BUFFER_SIZE, ("List %s",NoResi.c_str() ));
+    snprintf (msgi, MSG_BUFFER_SIZE, "List %s",NoResi.c_str() );
     client.publish(pub_user.c_str(),msgi);
       delay(100);
   }
