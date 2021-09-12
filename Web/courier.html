@@ -35,9 +35,9 @@
 
 
 				// console.log("Open - "+code);
-				mqtt.subscribe("Boku/courier/" + name);
+				mqtt.subscribe("BokuBox/courier/" + name);
 				message = new Paho.MQTT.Message("courier done");
-				message.destinationName = "Boku/courier/" + name;
+				message.destinationName = "BokuBox/courier/" + name;
 				mqtt.send(message);
 
 				window.location.href = "index.html";
@@ -53,9 +53,9 @@
 
 
 				// console.log("Open - "+code);
-				mqtt.subscribe("Boku/courier/" + name);
+				mqtt.subscribe("BokuBox/courier/" + name);
 				message = new Paho.MQTT.Message("courier done");
-				message.destinationName = "Boku/courier/" + name;
+				message.destinationName = "BokuBox/courier/" + name;
 				mqtt.send(message);
 			}
 
@@ -72,9 +72,9 @@
 			code = code.substring(code.length - 5, code.length);
 
 			// console.log("Open - "+code);
-			mqtt.subscribe("Boku/courier/" + name);
+			mqtt.subscribe("BokuBox/courier/" + name);
 			message = new Paho.MQTT.Message("courier " + code);
-			message.destinationName = "Boku/courier/" + name;
+			message.destinationName = "BokuBox/courier/" + name;
 			mqtt.send(message);
 		}
 
@@ -109,9 +109,9 @@
 			// const name = localStorage.getItem('NAME');
 			// var devID = document.getElementById("devID").value;
 			console.log("Connected to " + name);
-			mqtt.subscribe("Boku/courier/" + name);
+			mqtt.subscribe("BokuBox/courier/" + name);
 			message = new Paho.MQTT.Message("courier ping");
-			message.destinationName = "Boku/courier/" + name;
+			message.destinationName = "BokuBox/courier/" + name;
 			message.retained = true;
 			mqtt.send(message);
 		}
