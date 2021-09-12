@@ -309,6 +309,8 @@ void bokuOpen(){
     delay(100);
     servo.write(160);
     delay(100);
+    
+    client.publish(pub_user.c_str(), "Box Open");
     client.publish(pub_courier.c_str(), "Box Open");
 }
 
@@ -318,6 +320,8 @@ void bokuClose(){
     delay(10);
     servo.write(0);
     delay(100);
+    
+    client.publish(pub_user.c_str(), "Box Close");
     client.publish(pub_courier.c_str(), "Box Close");
 }
 
