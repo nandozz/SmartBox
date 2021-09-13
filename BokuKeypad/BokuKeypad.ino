@@ -175,6 +175,10 @@ void loop() {
   char key = keypad.getKey();
 
  if (key){
+  digitalWrite(LED_BUILTIN, LOW);
+     delay(100);
+     digitalWrite(LED_BUILTIN, HIGH);
+     delay(100);
     allkey += key;
     Serial.println(allkey);
     
