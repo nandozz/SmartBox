@@ -1,8 +1,9 @@
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
 #include "wifiConfig.h";
-const int FactoryPin = 0; //D3
-int buttonState = 0; 
+#include "keypadConfig.h"
+// const int FactoryPin = 0; //D3
+// int buttonState = 0; 
 
 void callback(char* topic, byte* payload, unsigned int length) {
   String code = "";
@@ -155,7 +156,7 @@ void reconnect() {
 void setup() {
   pinMode(BUILTIN_LED, OUTPUT);     // Initialize the BUILTIN_LED pin as an output
  servo.attach(2); //D4
-   pinMode(FactoryPin, INPUT);
+  //  pinMode(FactoryPin, INPUT);
 //  LEDindicator = 0;
 
 servo.write(0);
@@ -168,13 +169,31 @@ delay(2000);
 
 void loop() {
   ArduinoOTA.handle();
-  buttonState = digitalRead(FactoryPin); //D3
-  if (buttonState == LOW){
-    Serial.println("Factory Reset");
-    resetAll();
-    
-    
-  } 
+
+//  readkeypad();
+
+  char key = keypad.getKey();
+
+ if (key){
+    allkey += key;
+    Serial.println(allkey);
+    if (allkey == "12345"){
+    Serial.println("Open");
+    bokuOpen();
+    allkey="";
+   }
+   else if (key == '*' || '#'){
+    Serial.println("Reset");
+    bokuClose();
+    allkey="";
+  }
+  }
+  
+  // buttonState = digitalRead(FactoryPin); //D3
+  // if (buttonState == LOW){
+  //   Serial.println("Factory Reset");
+  //   resetAll();
+  //  } 
 
   if (!client.connected()) {
     reconnect();
