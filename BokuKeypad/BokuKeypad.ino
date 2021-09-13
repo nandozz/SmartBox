@@ -79,7 +79,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
     }
     
     //////////////////// List ///////////////////
-     else if (getValue(msg, ' ', 1) == "listView"){
+     else if (getValue(msg, ' ', 1) == "listView" || getValue(msg, ' ', 1) == "ping"){
       readList(1); 
       readAddress(); 
     }
@@ -177,12 +177,14 @@ void loop() {
  if (key){
     allkey += key;
     Serial.println(allkey);
-    if (allkey == "12345"){
-    Serial.println("Open");
-    bokuOpen();
-    allkey="";
+    
+    if (allkey == PIN || allkey == NoResi){
+        Serial.println("Open");
+        blinking();
+        bokuOpen();
+        allkey="";
    }
-   else if (key == '*' || '#'){
+   else if (key == '*' || key == '#'){
     Serial.println("Reset");
     bokuClose();
     allkey="";

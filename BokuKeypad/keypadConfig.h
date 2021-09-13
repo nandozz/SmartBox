@@ -21,21 +21,21 @@ String allkey="";
 
 Keypad keypad = Keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS);
 
-void readkeypad() {
-  char key = keypad.getKey();
-
- if (key){
-    allkey += key;
-    Serial.println(allkey);
-    if (allkey == "12345"){
-    Serial.println("Open");
-    bokuOpen();
-    allkey="";
-   }
-   else if (key == '*' || '#'){
-    Serial.println("Reset");
-    bokuClose();
-    allkey="";
-  }
-  }
-}
+//void readkeypad() {
+//  char key = keypad.getKey();
+//
+// if (key){
+//    allkey += key;
+//    Serial.println(allkey);
+//    if (allkey == "12345"){
+//    Serial.println("Open");
+//    bokuOpen();
+//    allkey="";
+//   }
+//   else if (key == '*' || '#'){
+//    Serial.println("Reset");
+//    bokuClose();
+//    allkey="";
+//  }
+//  }
+//}

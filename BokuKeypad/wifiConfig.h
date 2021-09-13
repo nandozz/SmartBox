@@ -38,6 +38,7 @@ String pub_user = "BokuBox/user/"+BokuID;
 String pub_courier = "BokuBox/courier/"+BokuID;
 String subscriber = "BokuBox/+/"+BokuID;
 String Herocode = "";
+String PIN = "";
 String NoResi = "";
 String Address = "";
 
@@ -111,6 +112,21 @@ void wifi_setting()
   Serial.print("Herocode: ");
   Serial.println(eherocode);
   Herocode = eherocode.c_str();
+
+  ////////////////////////////////////////////////////// PIN
+  //  Serial.println("Reading EEPROM PIN");
+  String epin = "";
+  for (int i = 106; i < 111; ++i)
+  {
+    epin += char(EEPROM.read(i));
+  }
+  Serial.print("PIN: ");
+  Serial.println(epin);
+  PIN = epin.c_str();
+
+
+
+  /////////////////
 
 
   WiFi.begin(esid.c_str(), epass.c_str());
@@ -270,7 +286,7 @@ String readList(int mode = 0){
 
 String readAddress(){
   String eaddress = "";
-  for (int i = 106; i < 206; ++i)
+  for (int i = 111; i < 211; ++i)
   {
     eaddress += char(EEPROM.read(i));
   }
@@ -378,8 +394,12 @@ content +="      <label>Device Address</label>\n";
 content +="      <input type=\"text\" name=\"address\" placeholder=\"your address\" maxlength=\"100\" required>\n";
 
 
-content +="      <label>Device Password (max 10 character)</label>\n";
+content +="      <label>App Password (max 10 character)</label>\n";
 content +="      <input type=\"text\" name=\"password\" placeholder=\"create new password\" maxlength=\"10\" required>\n";
+
+
+content +="      <label>PIN (5 digits)</label>\n";
+content +="      <input type=\"text\" name=\"pin\" placeholder=\"create new PIN\" pattern=\"[0-9]{5}\"  maxlength=\"5\" required>\n";
 
 
 content +="      <button type=\"submit\" >Connect</button> \n";
@@ -399,6 +419,7 @@ content +="</html> ";
       String qsid = server.arg("ssid");
       String qpass = server.arg("pass");
       String qherocode = server.arg("password");
+      String qpin = server.arg("pin");
       String qaddress = server.arg("address");
       if (qsid.length() > 0 && qpass.length() > 0) {
         Serial.println("clearing eeprom");
@@ -411,34 +432,43 @@ content +="</html> ";
         Serial.println("");
         Serial.println(qherocode);
         Serial.println("");
+        Serial.println(qpin);
+        Serial.println("");
         Serial.println(qaddress);
         Serial.println("");
 
-        Serial.println("writing eeprom ssid:");
+        Serial.println("writing eeprom ssid:");//32 char
         for (int i = 0; i < qsid.length(); ++i)
         {
           EEPROM.write(i, qsid[i]);
           Serial.print("Wrote: ");
           Serial.println(qsid[i]);
         }
-        Serial.println("writing eeprom pass:");
+        Serial.println("writing eeprom pass:");//64 char
         for (int i = 0; i < qpass.length(); ++i)
         {
           EEPROM.write(32 + i, qpass[i]);
           Serial.print("Wrote: ");
           Serial.println(qpass[i]);
         }
-        Serial.println("writing eeprom herocode:");
+        Serial.println("writing eeprom herocode:");//10 char
         for (int i = 0; i < qherocode.length(); ++i)
         {
           EEPROM.write(96 + i, qherocode[i]);
           Serial.print("Wrote: ");
           Serial.println(qherocode[i]);
         }
-        Serial.println("writing eeprom address:");
+         Serial.println("writing eeprom PIN:");//5 char
+        for (int i = 0; i < qpin.length(); ++i)
+        {
+          EEPROM.write(106 + i, qpin[i]);
+          Serial.print("Wrote: ");
+          Serial.println(qpin[i]);
+        }
+        Serial.println("writing eeprom address:");//100 char
         for (int i = 0; i < qaddress.length(); ++i)
         {
-          EEPROM.write(106 + i, qaddress[i]);
+          EEPROM.write(111 + i, qaddress[i]);
           Serial.print("Wrote: ");
           Serial.println(qaddress[i]);
         }
