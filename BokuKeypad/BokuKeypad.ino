@@ -1,3 +1,12 @@
+#define DEBUG 0
+#if DEBUG == 1
+#define debug(x) Serial.print(x)
+#define debugln(x) Serial.println(x)
+#else
+#define debug(x)
+#define debugln(x)
+#endif
+
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
 #include "wifiConfig.h";
@@ -8,44 +17,44 @@
 void callback(char* topic, byte* payload, unsigned int length) {
   String code = "";
   String msg = "";
-  Serial.print("\nMessage arrived [");
-  Serial.print(topic);
-  Serial.print("] ");
+  debug("\nMessage arrived [");
+  debug(topic);
+  debug("] ");
   for (int i = 0; i < length; i++) {
-    Serial.print((char)payload[i]);
+    debug((char)payload[i]);
     code += (char)payload[i];
   }
-  Serial.println();
+  debugln();
   msg = String(code);
   
-  Serial.println("word 0 = "+getValue(msg, ' ', 0));
-  Serial.println("word 1 = "+getValue(msg, ' ', 1));
-  Serial.println("word 2 = "+getValue(msg, ' ', 2));
+  debugln("word 0 = "+getValue(msg, ' ', 0));
+  debugln("word 1 = "+getValue(msg, ' ', 1));
+  debugln("word 2 = "+getValue(msg, ' ', 2));
   
 ////////////////////////////////////// Bokuno //////////////////////////////////////////////
 //if (isopen && (currentMillis - lastTime >= interval)) {
-//     Serial.print(lastTime);
-//  Serial.print("     ");
-//  Serial.println(currentMillis);
+//     debug(lastTime);
+//  debug("     ");
+//  debugln(currentMillis);
 //    bokuClose();  
 //  }
 
   if (getValue(msg, ' ', 0) == Herocode||getValue(msg, ' ', 0) == "BokunoHero"){
-    blinking();
+    
     
     
     //////////////////// ADD ///////////////////
     
     if (getValue(msg, ' ', 1) == "add"){      
-    Serial.println("Save No.Resi "+getValue(msg, ' ', 2));
+    debugln("Save No.Resi "+getValue(msg, ' ', 2));
     clearList();
     int lengthmsg = getValue(msg, ' ', 2).length() > 5 ? 5 : getValue(msg, ' ', 2).length();
     EEPROM.begin(512);
     for (int i = 0; i < lengthmsg; ++i)
         {
           EEPROM.write(206 + i, getValue(msg, ' ', 2)[i]);
-          Serial.print("Wrote: ");
-          Serial.println(getValue(msg, ' ', 2)[i]);
+          debug("Wrote: ");
+          debugln(getValue(msg, ' ', 2)[i]);
         }
 
         EEPROM.commit();
@@ -66,7 +75,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
     else if (getValue(msg, ' ', 1) == "restart"){
        client.publish(pub_user.c_str(), "RESTART DONE");
        delay(1000);
-    Serial.println("Boku restart");
+    debugln("Boku restart");
     ESP.restart();
     }
     
@@ -74,7 +83,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
     else if (getValue(msg, ' ', 1) == "reset"){
        client.publish(pub_user.c_str(), "RESET DONE");
        delay(1000);
-    Serial.println("Boku reset");
+    debugln("Boku reset");
     resetAll();
     }
     
@@ -88,14 +97,15 @@ void callback(char* topic, byte* payload, unsigned int length) {
      else if (getValue(msg, ' ', 1) == "listClear"){
        client.publish(pub_user.c_str(), "List -");
        clearList();
-      Serial.println("Boku No.Resi Clear");
+      debugln("Boku No.Resi Clear");
       readList();
     }
+    blinking();
     
 
 ////////////////////////////// COURIER ///////////////////////////////////
   }else if (getValue(msg, ' ', 0) == "courier"){
-    blinking();
+    
       
     if (getValue(msg, ' ', 1) == readList(0)){
     bokuOpen();
@@ -106,6 +116,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
     else if(getValue(msg, ' ', 1) == "done"){
       bokuClose();
     }
+    blinking();
     
   }
 }
@@ -131,21 +142,21 @@ String getValue(String data, char separator, int index)
 void reconnect() {
   // Loop until we're reconnected
   while (!client.connected()) {
-    Serial.print("Attempting MQTT connection...");
+    debug("Attempting MQTT connection...");
     // Create a random client ID
     String clientId = "BokuDevice-";
     clientId += String(random(0xffff), HEX);
     // Attempt to connect
     if (client.connect(clientId.c_str())) {
-      Serial.println("connected");
+      debugln("connected");
       // Once connected, publish an announcement...
       client.publish(pub_user.c_str(), "Hello, Boku");
       // ... and resubscribe
       client.subscribe(subscriber.c_str());
     } else {
-      Serial.print("failed, rc=");
-      Serial.print(client.state());
-      Serial.println(" try again in 5 seconds");
+      debug("failed, rc=");
+      debug(client.state());
+      debugln(" try again in 5 seconds");
       // Wait 5 seconds before retrying
       delay(5000);
       //add reset func if connection failed
@@ -154,6 +165,8 @@ void reconnect() {
 }
  
 void setup() {
+  
+  Serial.begin(115200); //Initialising if(DEBUG)Serial Monitor
   pinMode(BUILTIN_LED, OUTPUT);     // Initialize the BUILTIN_LED pin as an output
  servo.attach(2); //D4
   //  pinMode(FactoryPin, INPUT);
@@ -161,7 +174,7 @@ void setup() {
 
 servo.write(0);
 
-delay(2000);
+delay(800);
   wifi_setting();
   client.setServer(mqtt_server, 1883);
   client.setCallback(callback);
@@ -180,24 +193,26 @@ void loop() {
      digitalWrite(LED_BUILTIN, HIGH);
      delay(100);
     allkey += key;
-    Serial.println(allkey);
+    debugln(allkey);
     
     if (allkey == PIN || allkey == NoResi){
-        Serial.println("Open");
-        blinking();
+        debugln("Open");
+        
         bokuOpen();
+        blinking();
         allkey="";
    }
    else if (key == '*' || key == '#'){
-    Serial.println("Reset");
+    debugln("Reset");
     bokuClose();
+    blinking();
     allkey="";
   }
   }
   
   // buttonState = digitalRead(FactoryPin); //D3
   // if (buttonState == LOW){
-  //   Serial.println("Factory Reset");
+  //   debugln("Factory Reset");
   //   resetAll();
   //  } 
 

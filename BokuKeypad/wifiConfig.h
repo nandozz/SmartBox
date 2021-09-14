@@ -66,9 +66,8 @@ ESP8266WebServer server(80);
 void wifi_setting()
 {
 
-  Serial.begin(115200); //Initialising if(DEBUG)Serial Monitor
-  Serial.println();
-  Serial.println("Disconnecting previously connected WiFi");
+  debugln();
+  debugln("Disconnecting previously connected WiFi");
   WiFi.disconnect();
   EEPROM.begin(512); //Initialasing EEPROM
   delay(10);
@@ -78,50 +77,50 @@ void wifi_setting()
 //  digitalWrite(LED_BUILTIN, HIGH);
 //  pinMode(resetButton, INPUT);
 //  digitalWrite(resetButton, HIGH);
-  Serial.println();
-  Serial.println();
-  Serial.println("Startup");
+  debugln();
+  debugln();
+  debugln("Startup");
 
   //---------------------------------------- Read eeprom for ssid and pass
-//  Serial.println("Reading EEPROM ssid");
+//  debugln("Reading EEPROM ssid");
   String esid;
   for (int i = 0; i < 32; ++i)
   {
     esid += char(EEPROM.read(i));
   }
-  Serial.println();
-  Serial.print("SSID: ");
-  Serial.println(esid);
+  debugln();
+  debug("SSID: ");
+  debugln(esid);
   
-//  Serial.println("Reading EEPROM pass");
+//  debugln("Reading EEPROM pass");
   String epass = "";
   for (int i = 32; i < 96; ++i)
   {
     epass += char(EEPROM.read(i));
   }
-  Serial.print("PASS: ");
-  Serial.println(epass);
+  debug("PASS: ");
+  debugln(epass);
 
 
-//  Serial.println("Reading EEPROM herocode");
+//  debugln("Reading EEPROM herocode");
   String eherocode = "";
   for (int i = 96; i < 106; ++i)
   {
     eherocode += char(EEPROM.read(i));
   }
-  Serial.print("Herocode: ");
-  Serial.println(eherocode);
+  debug("Herocode: ");
+  debugln(eherocode);
   Herocode = eherocode.c_str();
 
   ////////////////////////////////////////////////////// PIN
-  //  Serial.println("Reading EEPROM PIN");
+  //  debugln("Reading EEPROM PIN");
   String epin = "";
   for (int i = 106; i < 111; ++i)
   {
     epin += char(EEPROM.read(i));
   }
-  Serial.print("PIN: ");
-  Serial.println(epin);
+  debug("PIN: ");
+  debugln(epin);
   PIN = epin.c_str();
 
 
@@ -134,23 +133,23 @@ void wifi_setting()
   {
   OTAfunc(esid.c_str(), epass.c_str(),"Boku-esp");
   blinking();
-    Serial.println("Succesfully Connected!!!");
+    debugln("Succesfully Connected!!!");
     return;
   }
   else
   {blinking();
   blinking();
-    Serial.println("Turning the HotSpot On");
+    debugln("Turning the HotSpot On");
     launchWeb();
     setupAP();// Setup HotSpot
   }
 
-  Serial.println();
-  Serial.println("Waiting.");
+  debugln();
+  debugln("Waiting.");
   int h = 0;
   while ((WiFi.status() != WL_CONNECTED))
   { 
-    Serial.print(".");
+    debug(".");
     delay(100);
     server.handleClient();
     delay(500);
@@ -170,35 +169,35 @@ void wifi_setting()
 bool testWifi(void)
 {
   int c = 0;
-  Serial.println("Waiting for Wifi to connect");
+  debugln("Waiting for Wifi to connect");
   while ( c < 40 ) {
     if (WiFi.status() == WL_CONNECTED)
     { 
       return true;
     }
     delay(500);
-    Serial.print("*");
+    debug("*");
     c++;
   }
-  Serial.println("");
-  Serial.println("Connect timed out, opening AP");
+  debugln("");
+  debugln("Connect timed out, opening AP");
   return false;
 }
 
 void launchWeb()
 
 {
-  Serial.println("");
+  debugln("");
   if (WiFi.status() == WL_CONNECTED)
-    Serial.println("WiFi connected");
-  Serial.print("Local IP: ");
-  Serial.println(WiFi.localIP());
-  Serial.print("SoftAP IP: ");
-  Serial.println(WiFi.softAPIP());
+    debugln("WiFi connected");
+  debug("Local IP: ");
+  debugln(WiFi.localIP());
+  debug("SoftAP IP: ");
+  debugln(WiFi.softAPIP());
   createWebServer();
   // Start the server
   server.begin();
-  Serial.println("Server started");
+  debugln("Server started");
 
 }
 
@@ -208,27 +207,27 @@ void setupAP(void)
   WiFi.disconnect();
   delay(100);
   int n = WiFi.scanNetworks();
-  Serial.println("scan done");
+  debugln("scan done");
   if (n == 0)
-    Serial.println("no networks found");
+    debugln("no networks found");
   else
   {
-    Serial.print(n);
-    Serial.println(" networks found");
+    debug(n);
+    debugln(" networks found");
     for (int i = 0; i < n; ++i)
     {
       // Print SSID and RSSI for each network found
-      Serial.print(i + 1);
-      Serial.print(": ");
-      Serial.print(WiFi.SSID(i));
-      Serial.print(" (");
-      Serial.print(WiFi.RSSI(i));
-      Serial.print(")");
-      Serial.println((WiFi.encryptionType(i) == ENC_TYPE_NONE) ? " " : "*");
+      debug(i + 1);
+      debug(": ");
+      debug(WiFi.SSID(i));
+      debug(" (");
+      debug(WiFi.RSSI(i));
+      debug(")");
+      debugln((WiFi.encryptionType(i) == ENC_TYPE_NONE) ? " " : "*");
       delay(10);
     }
   }
-  Serial.println("");
+  debugln("");
   st = "<select name='ssid'>";
   for (int i = 0; i < n; ++i)
   {
@@ -241,9 +240,9 @@ void setupAP(void)
   delay(100);
   
   WiFi.softAP(AP, APpass);  
-  Serial.println("softap");
+  debugln("softap");
   launchWeb();
-  Serial.println("over");
+  debugln("over");
 //  MDNS.update();
   
 }
@@ -271,10 +270,10 @@ String readList(int mode = 0){
   {
     enoResi += char(EEPROM.read(i));
   }
-  Serial.println();
-  Serial.print("No. Paket : ");
-  Serial.print(enoResi+" ");
-  Serial.println(enoResi.length());
+  debugln();
+  debug("No. Paket : ");
+  debug(enoResi+" ");
+  debugln(enoResi.length());
   NoResi = enoResi.c_str();
   if (mode == 1){  
     snprintf (msgi, MSG_BUFFER_SIZE, "List %s",NoResi.c_str() );
@@ -290,9 +289,9 @@ String readAddress(){
   {
     eaddress += char(EEPROM.read(i));
   }
-  Serial.println();
-  Serial.print("Address: ");
-  Serial.println(eaddress);
+  debugln();
+  debug("Address: ");
+  debugln(eaddress);
   Address = eaddress.c_str();
 
 
@@ -308,20 +307,22 @@ String readAddress(){
 void blinking(){
   for(int i = 0;i<3;i++){
 
+    
+        delay(200);
     digitalWrite(LED_BUILTIN, LOW);
      delay(100);
      digitalWrite(LED_BUILTIN, HIGH);
      delay(100);
   }
 
-    Serial.println("--Blinking LED--");
+    debugln("--Blinking LED--");
 }
 
 void bokuOpen(){
   isopen = true;
 //  unsigned long currentMillis = millis();
 //  lastTime = currentMillis; //open begin
-  Serial.println("Box Open");
+  debugln("Box Open");
     delay(100);
     servo.write(160);
     delay(100);
@@ -332,7 +333,7 @@ void bokuOpen(){
 
 void bokuClose(){
   isopen = false;
-  Serial.println("Box Close");
+  debugln("Box Close");
     delay(10);
     servo.write(0);
     delay(100);
@@ -344,7 +345,7 @@ void bokuClose(){
 void createWebServer()
 {
  {  if (!MDNS.begin("ESP")) { //esp.local/
-    Serial.println("MDNS Not responder started");
+    debugln("MDNS Not responder started");
   }
     server.on("/", []() {
 
@@ -422,55 +423,55 @@ content +="</html> ";
       String qpin = server.arg("pin");
       String qaddress = server.arg("address");
       if (qsid.length() > 0 && qpass.length() > 0) {
-        Serial.println("clearing eeprom");
+        debugln("clearing eeprom");
         for (int i = 0; i < 106; ++i) {
           EEPROM.write(i, 0);
         }
-        Serial.println(qsid);
-        Serial.println("");
-        Serial.println(qpass);
-        Serial.println("");
-        Serial.println(qherocode);
-        Serial.println("");
-        Serial.println(qpin);
-        Serial.println("");
-        Serial.println(qaddress);
-        Serial.println("");
+        debugln(qsid);
+        debugln("");
+        debugln(qpass);
+        debugln("");
+        debugln(qherocode);
+        debugln("");
+        debugln(qpin);
+        debugln("");
+        debugln(qaddress);
+        debugln("");
 
-        Serial.println("writing eeprom ssid:");//32 char
+        debugln("writing eeprom ssid:");//32 char
         for (int i = 0; i < qsid.length(); ++i)
         {
           EEPROM.write(i, qsid[i]);
-          Serial.print("Wrote: ");
-          Serial.println(qsid[i]);
+          debug("Wrote: ");
+          debugln(qsid[i]);
         }
-        Serial.println("writing eeprom pass:");//64 char
+        debugln("writing eeprom pass:");//64 char
         for (int i = 0; i < qpass.length(); ++i)
         {
           EEPROM.write(32 + i, qpass[i]);
-          Serial.print("Wrote: ");
-          Serial.println(qpass[i]);
+          debug("Wrote: ");
+          debugln(qpass[i]);
         }
-        Serial.println("writing eeprom herocode:");//10 char
+        debugln("writing eeprom herocode:");//10 char
         for (int i = 0; i < qherocode.length(); ++i)
         {
           EEPROM.write(96 + i, qherocode[i]);
-          Serial.print("Wrote: ");
-          Serial.println(qherocode[i]);
+          debug("Wrote: ");
+          debugln(qherocode[i]);
         }
-         Serial.println("writing eeprom PIN:");//5 char
+         debugln("writing eeprom PIN:");//5 char
         for (int i = 0; i < qpin.length(); ++i)
         {
           EEPROM.write(106 + i, qpin[i]);
-          Serial.print("Wrote: ");
-          Serial.println(qpin[i]);
+          debug("Wrote: ");
+          debugln(qpin[i]);
         }
-        Serial.println("writing eeprom address:");//100 char
+        debugln("writing eeprom address:");//100 char
         for (int i = 0; i < qaddress.length(); ++i)
         {
           EEPROM.write(111 + i, qaddress[i]);
-          Serial.print("Wrote: ");
-          Serial.println(qaddress[i]);
+          debug("Wrote: ");
+          debugln(qaddress[i]);
         }
 
         EEPROM.commit();
@@ -481,7 +482,7 @@ content +="</html> ";
       } else {
         content = "{\"Error\":\"404 not found\"}";
         statusCode = 404;
-        Serial.println("Sending 404");
+        debugln("Sending 404");
       }
       server.sendHeader("Access-Control-Allow-Origin", "*");
       server.send(statusCode, "application/json", content);

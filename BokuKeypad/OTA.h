@@ -5,13 +5,13 @@
 void OTAfunc(const char *ssid,const char *password,const char *host)
 {
 //  Serial.begin(115200);
-  Serial.println("OTA Func is Called");
+  debugln("OTA Func is Called");
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
   delay(100);
   while (WiFi.waitForConnectResult() != WL_CONNECTED)
   {
-    Serial.println("Connection Failed! Rebooting...");
+    debugln("Connection Failed! Rebooting...");
     delay(5000);
     ESP.restart();
   }
@@ -30,10 +30,10 @@ void OTAfunc(const char *ssid,const char *password,const char *host)
                        }
 
                        // NOTE: if updating FS this would be the place to unmount FS using FS.end()
-                       Serial.println("Start updating " + type);
+                       debugln("Start updating " + type);
                      });
   ArduinoOTA.onEnd([]()
-                   { Serial.println("\nEnd"); });
+                   { debugln("\nEnd"); });
   ArduinoOTA.onProgress([](unsigned int progress, unsigned int total)
                         { Serial.printf("Progress: %u%%\r", (progress / (total / 100))); });
   ArduinoOTA.onError([](ota_error_t error)
@@ -41,27 +41,27 @@ void OTAfunc(const char *ssid,const char *password,const char *host)
                        Serial.printf("Error[%u]: ", error);
                        if (error == OTA_AUTH_ERROR)
                        {
-                         Serial.println("Auth Failed");
+                         debugln("Auth Failed");
                        }
                        else if (error == OTA_BEGIN_ERROR)
                        {
-                         Serial.println("Begin Failed");
+                         debugln("Begin Failed");
                        }
                        else if (error == OTA_CONNECT_ERROR)
                        {
-                         Serial.println("Connect Failed");
+                         debugln("Connect Failed");
                        }
                        else if (error == OTA_RECEIVE_ERROR)
                        {
-                         Serial.println("Receive Failed");
+                         debugln("Receive Failed");
                        }
                        else if (error == OTA_END_ERROR)
                        {
-                         Serial.println("End Failed");
+                         debugln("End Failed");
                        }
                      });
   ArduinoOTA.begin();
-  Serial.println("Ready");
-  Serial.print("IP OTA address: ");
-  Serial.println(WiFi.localIP());
+  debugln("Ready");
+  debug("IP OTA address: ");
+  debugln(WiFi.localIP());
 }

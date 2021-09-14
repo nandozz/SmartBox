@@ -26,14 +26,14 @@ Keypad keypad = Keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS);
 //
 // if (key){
 //    allkey += key;
-//    Serial.println(allkey);
+//    debugln(allkey);
 //    if (allkey == "12345"){
-//    Serial.println("Open");
+//    debugln("Open");
 //    bokuOpen();
 //    allkey="";
 //   }
 //   else if (key == '*' || '#'){
-//    Serial.println("Reset");
+//    debugln("Reset");
 //    bokuClose();
 //    allkey="";
 //  }
