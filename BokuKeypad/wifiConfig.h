@@ -308,7 +308,7 @@ void blinking(){
   for(int i = 0;i<3;i++){
 
     
-        delay(200);
+        delay(300);
     digitalWrite(LED_BUILTIN, LOW);
      delay(100);
      digitalWrite(LED_BUILTIN, HIGH);
@@ -324,7 +324,7 @@ void bokuOpen(){
 //  lastTime = currentMillis; //open begin
   debugln("Box Open");
     delay(100);
-    servo.write(160);
+    servo.write(0);
     delay(100);
     
     client.publish(pub_user.c_str(), "Box Open");
@@ -335,7 +335,7 @@ void bokuClose(){
   isopen = false;
   debugln("Box Close");
     delay(10);
-    servo.write(0);
+    servo.write(80);
     delay(100);
     
     client.publish(pub_user.c_str(), "Box Close");
