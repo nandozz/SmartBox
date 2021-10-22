@@ -172,7 +172,7 @@ void setup() {
   //  pinMode(FactoryPin, INPUT);
 //  LEDindicator = 0;
 
-servo.write(0);
+servo.write(80);
 
 delay(800);
   wifi_setting();

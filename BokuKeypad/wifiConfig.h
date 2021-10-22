@@ -1,4 +1,4 @@
-//BokuBox
+o//BokuBox
 #include "Utilities.h"
 #include "OTA.h";
 // #include <ESP8266WiFi.h>
@@ -305,10 +305,10 @@ String readAddress(){
 }
 
 void blinking(){
-  for(int i = 0;i<3;i++){
+  for(int i = 0;i<2;i++){
 
     
-        delay(300);
+  delay(300);
     digitalWrite(LED_BUILTIN, LOW);
      delay(100);
      digitalWrite(LED_BUILTIN, HIGH);
