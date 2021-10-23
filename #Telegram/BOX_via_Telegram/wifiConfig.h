@@ -24,8 +24,8 @@ char msgi[MSG_BUFFER_SIZE];
 ////////////////////////////////////////////////////
 ////////////////////////////////////////////////////
         String DevID = "A1234";      //Production code
-        String AP = "Boku Box "+DevID;                ////
-        String APpass = "bokuboxA1234";             ////
+        String AP = "Paket Box "+DevID;                ////
+        String APpass = "paketbox";             ////
 ////////////////////////////////////////////////////
 ////////////////////////////////////////////////////
 
@@ -130,6 +130,19 @@ void wifi_setting()
   if (testWifi())
   {
   OTAfunc(esid.c_str(), epass.c_str(),"Boku-esp");
+  myBot.wifiConnect(esid.c_str(), epass.c_str());
+  //set Token
+  myBot.setTelegramToken(token);
+  
+  //Connection wifi check
+  if (myBot.testConnection())
+  {
+    Serial.print("Success to connect");
+ myBot.sendMessage(GroupID, "Device : " + DevID + " ("+ WiFi.localIP().toString() +")\nGroupID : " + GroupID + "\n--- Device Ready ---");
+//    digitalWrite(Relay, LOW);
+    //buzzer("success");
+  }
+  
   blinking();
     debugln("Succesfully Connected!!!");
     return;
@@ -307,9 +320,9 @@ void blinking(){
 
     
   delay(300);
-    digitalWrite(LED_BUILTIN, LOW);
+    digitalWrite(LED_BUILTIN, HIGH);
      delay(100);
-     digitalWrite(LED_BUILTIN, HIGH);
+     digitalWrite(LED_BUILTIN, LOW);
      delay(100);
   }
 
@@ -472,8 +485,20 @@ content +="</html> ";
 
         EEPROM.commit();
 
-        content = "{\"Success\":\"saved to eeprom... reset to boot into new wifi\"}";
-        statusCode = 200;
+        
+content = "<!DOCTYPE html>\n";
+content += "<html>\n";
+content += "<head>\n";
+content +="<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n";
+content +="<style>h2{text-align: center;color:#7E9CC0;border: 5px solid #E5F1FF;border-style: none none solid none;}body{display: flex;flex-direction: column;justify-content: center;}";
+content +="</style>\n";
+content +="</head>\n";
+content +="<body>\n";
+content +="<h2>Setting Successfully</h2>\n<p> ";
+content +="</body>\n";
+content +="</html> ";
+   server.send(200, "text/html", content);
+        delay(300);
         ESP.reset();
       } else {
         content = "{\"Error\":\"404 not found\"}";

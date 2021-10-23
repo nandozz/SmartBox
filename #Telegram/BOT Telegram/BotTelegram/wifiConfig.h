@@ -21,9 +21,9 @@ CTBot myBot;
 
 ////////////////////////////////////////////////////
 ////////////////////////////////////////////////////
-        String DevNum = "#2";      //Production code
-        String AP = "Rumah Gas 2";                ////
-        String APpass = "rumahgas";             ////
+        String DevNum = "#1";      //Production code
+        String AP = "Paket BOX 1";                ////
+        String APpass = "paketbox1";             ////
 ////////////////////////////////////////////////////
 ////////////////////////////////////////////////////  
 
@@ -43,11 +43,11 @@ int UserID=0;
 String Address = "";
 
 //ESP1
-int Relay = 0;
-int OrderButt = 2;
+//int Relay = 0;
+//int OrderButt = 2;
 //ESP8266 12E
-//int Relay = 2;
-//int OrderButt = 4;
+int Relay = 2;
+int OrderButt = 4;
 
 
 bool fan = false;
@@ -133,12 +133,12 @@ void settingUp()
   {
     Serial.print("Success to connect");
  myBot.sendMessage(UserID, "Device : " + DevNum + " ("+ WiFi.localIP().toString() +")\nUserID : " + UserID + "\nAddress : " + Address + "\n--- Device Ready ---");
-    digitalWrite(Relay, HIGH);
+    digitalWrite(Relay, LOW);
     //buzzer("success");
   }
   else
   {
-    Serial.print("Failed to connect");
+    Serial.println("Failed to connect");
     digitalWrite(Relay, LOW);
     //buzzer("failed");
   }
@@ -368,8 +368,22 @@ content +="</html> ";
         }
         EEPROM.commit();
 
-        content = "{\"Success\":\"saved to eeprom... reset to boot into new wifi\"}";
-        statusCode = 200;
+content = "<!DOCTYPE html>\n";
+content += "<html>\n";
+content += "<head>\n";
+content +="<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n";
+content +="<style>h2{text-align: center;color:#7E9CC0;border: 5px solid #E5F1FF;border-style: none none solid none;}body{display: flex;flex-direction: column;justify-content: center;}";
+content +="</style>\n";
+content +="</head>\n";
+content +="<body>\n";
+content +="<h2>Setting Successfully</h2>\n<p> ";
+content +="</body>\n";
+content +="</html> ";
+
+//        content = "{\"Success\":\"saved to eeprom... reset to boot into new wifi\"}";
+//        statusCode = 200;
+        server.send(200, "text/html", content);
+        delay(300);
         ESP.reset();
       } else {
         content = "{\"Error\":\"404 not found\"}";
