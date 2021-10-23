@@ -130,18 +130,18 @@ void settingUp()
   
   //Connection wifi check
   if (myBot.testConnection())
-  {
+    {
     Serial.print("Success to connect");
  myBot.sendMessage(UserID, "Device : " + DevNum + " ("+ WiFi.localIP().toString() +")\nUserID : " + UserID + "\nAddress : " + Address + "\n--- Device Ready ---");
     digitalWrite(Relay, LOW);
     //buzzer("success");
-  }
+    }
   else
-  {
+    {
     Serial.println("Failed to connect");
     digitalWrite(Relay, LOW);
     //buzzer("failed");
-  }
+    }
     
     
     Serial.println("Succesfully Connected!!!");
