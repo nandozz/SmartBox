@@ -47,7 +47,7 @@ String NoResi = "";
 //int resetButton = 2;
 //ESP8266 12E
 //int LED_BUILTIN = 2;
-//int resetButton = 4;
+int resetButton = 4;
 
 
 bool state = false;
@@ -129,7 +129,7 @@ void wifi_setting()
   WiFi.begin(esid.c_str(), epass.c_str());
   if (testWifi())
   {
-  OTAfunc(esid.c_str(), epass.c_str(),"Boku-esp");
+  OTAfunc(esid.c_str(), epass.c_str(),"Box-esp");
   myBot.wifiConnect(esid.c_str(), epass.c_str());
   //set Token
   myBot.setTelegramToken(token);
@@ -338,6 +338,7 @@ void bokuOpen(){
     servo.write(0);
     delay(100);
     isopen = true;
+    blinking();
     
 }
 
@@ -348,6 +349,7 @@ void bokuClose(){
     servo.write(80);
     delay(100);
     isopen = false;
+    blinking();
     
 }
 
