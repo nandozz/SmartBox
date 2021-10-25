@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      flex-direction: column;
+      background-color: #FF4B3A;
+    }
+
+    h2 {
+      width: 284px;
+      height: 125px;
+      left: 45px;
+      top: 77px;
+      font-family: Nunito;
+      font-style: normal;
+      font-weight: 600;
+      font-size: 48px;
+      line-height: 65px;
+      color: rgba(255, 255, 255, 0.6);
+      margin-bottom: 36px;
+    }
+
+    h1 {
+      width: 244px;
+      height: 27px;
+      left: 45px;
+      top: 238px;
+      font-family: Nunito;
+      font-style: normal;
+      font-weight: 800;
+      font-size: 18px;
+      line-height: 25px;
+      color: rgba(255, 255, 255, 0.6);
+      margin-bottom: 36px;
+    }
+
+
+    input,
+    select {
+      font-style: normal;
+      font-weight: 600;
+      font-size: 17px;
+      line-height: 25px;
+      margin-bottom: 20px;
+      border-radius: 10px;
+      height: 35px;
+      padding: 20px;
+      display: block;
+      width: 97%;
+      border: none;
+      background: #FFFFFF;
+      border-radius: 30px;
+      outline: none;
+    }
+
+    [placeholder]:focus::-webkit-input-placeholder {
+      transition: text-indent 0.4s 0.4s ease;
+      text-indent: -100%;
+      opacity: 1;
+    }
+
+
+
+    button {
+      font-style: normal;
+      font-weight: 600;
+      font-size: 17px;
+      line-height: 25px;
+      text-align: center;
+      width: 124px;
+      height: 58px;
+      left: 236px;
+      top: 749px;
+      background: #000000;
+      border-radius: 30px;
+      border: none;
+      float: right;
+      color: white;
+    }
+  </style>
+</head>
+
+<body>
+  <h2>Welcome, Paket Box</h2>
+  <h1>Add Your Device</h1>
+  <div class="card">
+    <div class="container">
+      <form method='get' action='setting'>
+        <input type="text" name="groupid" placeholder="Group ID" maxlength="10" required>
+        <input type="text" name="ssid" placeholder="WiFi" required>
+        <input type="text" name="pass" placeholder=" Password WiFi" required>
+        <input type="text" name="pin" placeholder="PIN Device" pattern="[0-9]{5}" maxlength="5" required>
+        <button type="submit">SAVE</button>
+      </form>
+    </div>
+  </div>
+</body>
+
+</html>
