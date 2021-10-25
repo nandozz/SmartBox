@@ -365,52 +365,29 @@ content = "<!DOCTYPE html>\n";
 content += "<html>\n";
 content += "<head>\n";
 content +="<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n";
-content +="<style>h2{text-align: center;color:#7E9CC0;border: 5px solid #E5F1FF;border-style: none none solid none;}body{display: flex;flex-direction: column;justify-content: center;}";
-content +="input, select{font-size: 1.2rem;margin-top: 5px;margin-bottom: 20px;border-radius: 10px;height: 35px;padding: 5px;display: block;\n";
-content +="width: 97%;border:none;border-bottom: 1px solid #1890ff;outline: none;}";
+content +="<style>";
+
+content +="body {flex-direction: column;background-color: #FF4B3A;}";
+content +="h2{width: 284px;height: 125px;left: 45px;top: 77px;font-family: Nunito;font-style: normal;font-weight: 600;font-size: 48px;line-height: 65px;color: rgba(255, 255, 255, 0.6);margin-bottom: 36px;}";
+content +="h1{width: 244px;height: 27px;left: 45px;top: 238px;font-family: Nunito;font-style: normal;font-weight: 800;font-size: 18px;line-height: 25px;color: rgba(255, 255, 255, 0.6);margin-bottom: 36px;}";
+content +="input,select {font-style: normal;font-weight: 600;font-size: 17px;line-height: 25px;margin-bottom: 20px;border-radius: 10px;height: 35px;padding: 20px;display: block;width: 97%;border: none;background: #FFFFFF;border-radius: 30px;outline: none;}";
 content +="[placeholder]:focus::-webkit-input-placeholder {\n";
 content +="transition: text-indent 0.4s 0.4s ease;text-indent: -100%;opacity: 1;}\n";
-content +=".card {\n";
-content +="position: relative;width: 80%;margin-left: auto;margin-right: auto;padding: 5%;border-radius: 20px;\n";
-content +="background: linear-gradient(162.54deg, rgba(160, 198, 245, 1) 6.43%, rgba(160, 198, 245, 0) 95.91%);\n";
-content +="border: 1px solid #E5E5E5;}\n";
-content +=".card:hover {box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);}\n";
-content +="button {\n";
-content +="background: #7E9CC0;\n";
-content +="border: none;\n";
-content +="box-sizing: border-box;\n";
-content +="box-shadow: 0px 4px 8px #A0C6F5;\n";
-content +="border-radius: 10px;\n";
-content +="height: 56px;\n";
-content +="display: block;\n";
-content +="width: 100%;\n";
-content +="color: white;\n";
-content +="} \n";
+content +="button {font-style: normal;font-weight: 600;font-size: 17px;line-height: 25px;text-align: center;width: 124px;height: 58px;left: 236px;top: 749px;background: #000000;border-radius: 30px;border: none;float: right;color: white;}";
+
 content +="</style>\n";
 content +="</head>\n";
 content +="<body>\n";
-content +="<h2>\""+AP+"\"</h2>\n<p> ";
-content += "<h3 style=color:#7E9CC0;>Device ID : "+DevID+"</h3>\n";
-content += "<p> Please select your Access Point</p>";
+
+content +="  <h2>Welcome, Paket Box</h2><br><h1>Add Your Device</h1><br>";
 content +="<div class=\"card\">  \n";
 content +="  <div class=\"container\">\n";
 content +="  \t<form  method='get' action='setting'>\n";
-content +="      <label>SSID</label><br>\n";
+
+content +="      <input type=\"text\" name=\"groupid\" placeholder=\" Group ID\" maxlength=\"10\" required>\n";
 content += st;
-content +="      <label>Password</label>\n";
-content +="      <input type=\"text\" name=\"pass\" placeholder=\" SSID password\" required>\n";
-
-//content +="      <label>Device Address</label>\n";
-//content +="      <input type=\"text\" name=\"address\" placeholder=\"your address\" maxlength=\"100\" required>\n";
-
-
-content +="      <label>Group ID (max 10 character)</label>\n";
-content +="      <input type=\"text\" name=\"groupid\" placeholder=\"-123456789\" maxlength=\"10\" required>\n";
-
-
-content +="      <label>PIN (5 digits)</label>\n";
-content +="      <input type=\"text\" name=\"pin\" placeholder=\"create new PIN\" pattern=\"[0-9]{5}\"  maxlength=\"5\" required>\n";
-
+content +="      <input type=\"text\" name=\"pass\" placeholder=\" Password WiFi\" required>\n";
+content +="      <input type=\"text\" name=\"pin\" placeholder=\"PIN Device\" pattern=\"[0-9]{5}\"  maxlength=\"5\" required>\n";
 
 content +="      <button type=\"submit\" >SAVE</button> \n";
 content +="\t</form>   \n";

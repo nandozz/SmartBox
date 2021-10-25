@@ -1,0 +1,34 @@
+content = "<!DOCTYPE html>\n";
+content += "<html>\n";
+content += "<head>\n";
+content +="<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n";
+content +="<style>";
+
+content +="body {flex-direction: column;background-color: #FF4B3A;}";
+content +="h2{width: 284px;height: 125px;left: 45px;top: 77px;font-family: Nunito;font-style: normal;font-weight: 600;font-size: 48px;line-height: 65px;color: rgba(255, 255, 255, 0.6);margin-bottom: 36px;}";
+content +="h1{width: 244px;height: 27px;left: 45px;top: 238px;font-family: Nunito;font-style: normal;font-weight: 800;font-size: 18px;line-height: 25px;color: rgba(255, 255, 255, 0.6);margin-bottom: 36px;}";
+content +="input,select {font-style: normal;font-weight: 600;font-size: 17px;line-height: 25px;margin-bottom: 20px;border-radius: 10px;height: 35px;padding: 20px;display: block;width: 97%;border: none;background: #FFFFFF;border-radius: 30px;outline: none;}";
+content +="[placeholder]:focus::-webkit-input-placeholder {\n";
+content +="transition: text-indent 0.4s 0.4s ease;text-indent: -100%;opacity: 1;}\n";
+content +="button {font-style: normal;font-weight: 600;font-size: 17px;line-height: 25px;text-align: center;width: 124px;height: 58px;left: 236px;top: 749px;background: #000000;border-radius: 30px;border: none;float: right;color: white;}";
+
+content +="</style>\n";
+content +="</head>\n";
+content +="<body>\n";
+
+content +="  <h2>Welcome, Paket Box</h2><br><h1>Add Your Device</h1><br>";
+content +="<div class=\"card\">  \n";
+content +="  <div class=\"container\">\n";
+content +="  \t<form  method='get' action='setting'>\n";
+
+content +="      <input type=\"text\" name=\"groupid\" placeholder=\" Group ID\" maxlength=\"10\" required>\n";
+content += st;
+content +="      <input type=\"text\" name=\"pass\" placeholder=\" Password WiFi\" required>\n";
+content +="      <input type=\"text\" name=\"pin\" placeholder=\"PIN Device\" pattern=\"[0-9]{5}\"  maxlength=\"5\" required>\n";
+
+content +="      <button type=\"submit\" >SAVE</button> \n";
+content +="\t</form>   \n";
+content +="  </div>\n";
+content +="</div>\n";
+content +="</body>\n";
+content +="</html> ";
