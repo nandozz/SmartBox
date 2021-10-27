@@ -1,6 +1,6 @@
 //ESP12E
 
-#define DEBUG 1
+#define DEBUG 0
 #if DEBUG == 1
 #define debug(x) Serial.print(x)
 #define debugln(x) Serial.println(x)
@@ -47,13 +47,13 @@ void loop() {
      delay(100);
     allkey += key;
     debugln(allkey);
-     String received = readList();   
+  
     
-    if (allkey == PIN || received.indexOf(allkey)>=0){
+    if (allkey == PIN || AllResi.indexOf(allkey)>=0){
         debugln("Open");        
         bokuOpen();
         blinking();
-        if (allkey == PIN){isreceive = true;}
+        if (AllResi.indexOf(allkey)>=0){isreceive = true;}
         allkey="";
         }
    else if (allkey == "#"+PIN+"#"){
@@ -84,55 +84,7 @@ if (myBot.getNewMessage(msg))
     String Name = (String)msg.sender.firstName;
 
     String command = msg.text;
-
-//    //Command FROM ADMIN
-//    if (msg.group.id == AdminID){
-//      
-//    if (command == "/alldevices")
-//    {
-//      myBot.sendMessage(AdminID, "Device : " + DevID + " (" + GroupID + ")\nName : " + (((String)msg.group.title == "")?(String)msg.sender.firstName : (String)msg.group.title) + "\n--- ACTIVE ---");
-//    }
-//    else if (command == "/" + DevID + "restart")
-//    {
-//      myBot.sendMessage(AdminID, "Device : " + DevID + " (" + GroupID + ")\n--- Restart, Are you Sure ? ---\n/"+DevID+"YES\t\t/"+DevID+"NO");
-//      restarting = true;      
-//      
-//    }
-//    else if (restarting && command == "/" + DevID + "YES")
-//    {
-//      myBot.sendMessage(AdminID, "Device : " + DevID + " (" + GroupID + ")\n--- Restart ---");
-//      myBot.sendMessage(GroupID, "Device : " + DevID + " (" + GroupID + ")\n--- Restart by Admin ---");
-//      restarting = false;      
-//      ESP.restart();
-//    }
-//    
-//    else if (command == "/" + DevID + "open")
-//    {
-//      myBot.sendMessage(AdminID, "Device : " + DevID + " (" + GroupID + ")\n--- BOX Open ---");
-//      myBot.sendMessage(GroupID, "Device : " + DevID + " (" + GroupID + ")\n--- BOX Open by Admin ---");
-//      bokuOpen();
-//    }
-//    else if (command == "/" + DevID + "close")
-//    {
-//      myBot.sendMessage(AdminID, "Device : " + DevID + " (" + GroupID + ")\n--- BOX Close ---");
-//      myBot.sendMessage(GroupID, "Device : " + DevID + " (" + GroupID + ")\n--- BOX Close by Admin ---");
-//      bokuClose();
-//    }
-//    else if (command == "/" + DevID + "reset")
-//    {
-//      myBot.sendMessage(AdminID, "Device : " + DevID + " (" + GroupID + ")\n--- RESET, Are you Sure ? ---\n/"+DevID+"YES\t\t/"+DevID+"NO");
-//      reseting = true;   
-//    }
-//    else if (reseting && command == "/" + DevID + "YES")
-//    {
-//      myBot.sendMessage(AdminID, "Device : " + DevID + " (" + GroupID + ")\n--- RESET ---");
-//      myBot.sendMessage(GroupID, "Device : " + DevID + " (" + GroupID + ")\n--- RESET by Admin ---");
-//      reseting = false;   
-//      resetAll();
-//    }
-//    
-//    }
-
+    
     //MESSAGE FROM GROUP TELEGRAM
      if (msg.group.id == GroupID)
     {
@@ -141,11 +93,8 @@ if (myBot.getNewMessage(msg))
       //////////////////////////////////////////////////////////////////
       if (command.indexOf("add")>0 && lengthmsg>0){  
         
-        String resi = getValue(command, ' ', 2);    
-             
-        debugln("Save No.Resi : "+resi);    
-        clearList();
-        
+        String resi = getValue(command, ' ', 2);
+        debugln("Save No.Resi : "+resi);         
     
         if(lengthmsg > 5 ){
           resi = resi.substring(0,5)+'.';
@@ -153,7 +102,8 @@ if (myBot.getNewMessage(msg))
         else{
           resi = resi+'.';
         }
-        AllResi = readList()+resi;
+        AllResi = readList()+= resi;
+        
     EEPROM.begin(512);
     for (int i = 0; i < AllResi.length(); ++i)
         {
@@ -163,10 +113,9 @@ if (myBot.getNewMessage(msg))
         
 
         EEPROM.commit();
-//        NoResi = getValue(readList(),'.',0);
         
         
-        snprintf (msgi, MSG_BUFFER_SIZE, "%s - %s...\nBerhasil terdaftar",getValue(command, ' ', 1).c_str(),getValue(readList(),'.',0).c_str() );
+        snprintf (msgi, MSG_BUFFER_SIZE, "%s - %s\nBerhasil terdaftar",getValue(command, ' ', 1).c_str(),getValue(command,' ',2).c_str() );
         myBot.sendMessage(GroupID, msgi);
     
     }
@@ -174,10 +123,10 @@ if (myBot.getNewMessage(msg))
       //////////////////////////////////////////////////////////////////
 
 
-      else if (command.indexOf("remove")>0)
+      else if (command=="/clear")
       {
         clearList();
-        myBot.sendMessage(GroupID, "Hallo, " + (String)msg.sender.firstName + "\nKamu sudah menghapus paket");
+        myBot.sendMessage(GroupID, "Hi, " + (String)msg.sender.firstName + "\nKamu berhasil membersihkan list resi");
       }
 
      
@@ -196,17 +145,27 @@ if (myBot.getNewMessage(msg))
         myBot.sendMessage(msg.group.id, "BOX CLOSE");
         isopen = false;
       }
+
+        else if (command == "/myprofile")
+      {
+        String state="Device ID : " + DevID + "/" + GroupID + 
+                     "\nPIN : "+PIN.c_str();
+        snprintf (msgi, MSG_BUFFER_SIZE, "%s",state.c_str());
+        myBot.sendMessage(GroupID, msgi);
+      }
+      
       else if (command == "/status")
       {
+        AllResi = readList();
+        
       NoResi="";
 
-         for (int i=0;i<3;i++){
-        String Resi = "\n"+String(i+1)+" "+getValue(readList(),'.',i)+"..";
+         for (int i=0;i<countList(AllResi,'.');i++){
+        String Resi = "\n"+String(i+1)+". "+getValue(AllResi,'.',i)+"..";
         NoResi+=Resi;
         }
       String state="Device ID : " + DevID + "/" + GroupID + 
         "\nStatus BOX : "+(isopen ? "Open" : "Close")+
-        "\nPIN : "+PIN.c_str()+
         "\nStatus Receive : "+(isreceive ? "Success" : "Not Yet");
         snprintf (msgi, MSG_BUFFER_SIZE, "%s\nList:%s",state.c_str(),NoResi.c_str() );
         myBot.sendMessage(GroupID, msgi);
