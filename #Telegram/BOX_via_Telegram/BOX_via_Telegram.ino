@@ -29,6 +29,7 @@ servo.write(80);
 
 delay(800);
   wifi_setting();
+  AllResi=readList();
 }
 
 void loop() {
@@ -45,35 +46,48 @@ void loop() {
      delay(100);
      digitalWrite(LED_BUILTIN, HIGH);
      delay(100);
-    allkey += key;
-    debugln(allkey);
-  
-    
-    if (allkey == PIN || AllResi.indexOf(allkey)>=0){
+     allkey += key;
+     debugln("allkey:"+allkey);
+ }
+    if (key == '*'){
+    debugln("Close");
+    bokuClose();
+    allkey="";
+    access="";
+  }
+    else if (allkey == PIN){
         debugln("Open");        
         bokuOpen();
-        blinking();
-        if (AllResi.indexOf(allkey)>=0){isreceive = true;}
         allkey="";
+        access="";
         }
-   else if (allkey == "#"+PIN+"#"){
-    myBot.sendMessage(GroupID, "Device ID: " + DevID + " (" + GroupID + ")\n--- Device Reseting ---");
+    else if (allkey == "#"+PIN+"#"){
+    myBot.sendMessage(GroupID, "Device ID : " + DevID + "\nGroup ID : " + GroupID + "\n--- Device Reseting ---");
     resetAll();    
    }
   
-   else if (key == '*'){
-    debugln("Close");
-    bokuClose();
-    blinking();
-    allkey="";
-  }
-  }
+   
+  else if (allkey.length()>=5){
+      access = allkey;
+      debugln("in length:"+access);
+      if (AllResi.indexOf(access)>=0){
+        debugln("Match"+AllResi);
+          bokuOpen();
+        myBot.sendMessage(GroupID, "--- Received ---\nID: " + access + "...");
+          isreceive = true;
+          
+        delay(5000);
+        bokuClose();
+        allkey="";
+        access="";
+        }      
+     }
+      
+      
+     
+
   
-  // buttonState = digitalRead(FactoryPin); //D3
-  // if (buttonState == LOW){
-  //   debugln("Factory Reset");
-  //   resetAll();
-  //  } 
+  
 
 
 
@@ -148,8 +162,16 @@ if (myBot.getNewMessage(msg))
 
         else if (command == "/myprofile")
       {
-        String state="Device ID : " + DevID + "/" + GroupID + 
+        String state="Device ID : " + DevID + "\nGroup ID : " + GroupID + 
                      "\nPIN : "+PIN.c_str();
+        snprintf (msgi, MSG_BUFFER_SIZE, "%s",state.c_str());
+        myBot.sendMessage(GroupID, msgi);
+      }
+
+      else if (command == "/noreceived")
+      {
+        isreceive = false;
+        String state="Status Receive : No Receive";
         snprintf (msgi, MSG_BUFFER_SIZE, "%s",state.c_str());
         myBot.sendMessage(GroupID, msgi);
       }

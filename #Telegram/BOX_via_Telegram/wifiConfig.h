@@ -42,6 +42,7 @@ const int AdminID = -508399154;
 int GroupID = 0;
 String PIN = "";
 String AllResi,NoResi = "";
+const char *arrayResi[]={};
 
 
 //ESP1
@@ -139,7 +140,7 @@ void wifi_setting()
 
     //Connection wifi check
     if (myBot.testConnection())
-    {
+    { 
       Serial.print("Success to connect");
       myBot.sendMessage(GroupID, "Device : " + DevID + " (" + WiFi.localIP().toString() + ")\nGroupID : " + GroupID + "\n--- Device Ready ---");
       //    digitalWrite(Relay, LOW);
@@ -288,11 +289,21 @@ String readList() {
   debug("No. Paket : ");
   debug(enoResi + " ");
   //  debugln(enoResi.length());
-  AllResi = enoResi.c_str();
+//  AllResi = enoResi.c_str();
   delay(100);
 
   return  enoResi.c_str();
 }
+
+//void toArray(String allResi,int len){
+// 
+//   for (int i=0;i<len;i++){
+//       *arrayResi[i]= getValue(AllResi,'.',i);
+//        }
+//   debugln(arrayResi[]);
+//   
+//  
+//}
 
 
 void blinking() {

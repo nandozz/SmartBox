@@ -17,8 +17,7 @@ char keys[ROWS][COLS] = {
 //byte colPins[COLS] = {D3, D1, D5}; 
 byte rowPins[ROWS] = {4, 13, 12, 16}; 
 byte colPins[COLS] = {0, 5, 14}; 
-String allkey="";
-
+String allkey,access="";
 Keypad keypad = Keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS);
 
 //void readkeypad() {
