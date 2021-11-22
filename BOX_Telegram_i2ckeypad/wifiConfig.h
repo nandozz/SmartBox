@@ -37,8 +37,8 @@ int statusCode;
 String st;
 String content;
 
-String token = "1934174372:AAEVXbfdOvipT6FOMj4rqgVo0aU8LvW4Ko0"; // REPLACE myToken WITH YOUR TELEGRAM BOT TOKEN
-const int AdminID = -508399154;
+String token = "1954149109:AAHtt10ZRb4SwET3RGDFFXg_efCs3PI3d4I"; // REPLACE myToken WITH YOUR TELEGRAM BOT TOKEN
+//const int AdminID = -508399154;
 int GroupID = 0;
 String PIN = "";
 String AllResi,NoResi = "";

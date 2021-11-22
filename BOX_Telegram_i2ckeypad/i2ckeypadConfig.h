@@ -14,5 +14,6 @@ char keys[ROWS][COLS] = {
   };
 byte rowPins[ROWS] = {2, 7, 6, 4}; //connect to the row pinouts of the keypad
 byte colPins[COLS] = {3, 1, 5}; 
-String allkey,access="";
+String allkey="";
+bool checked = false;
 Keypad_I2C keypad = Keypad_I2C( makeKeymap(keys), rowPins, colPins, ROWS, COLS, I2CADDR );
