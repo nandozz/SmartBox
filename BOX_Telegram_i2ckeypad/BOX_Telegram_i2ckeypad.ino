@@ -113,15 +113,9 @@ if (myBot.getNewMessage(msg))
         debugln("Save No.Resi : "+resi);         
         resi = resi.substring((lengthmsg-5),lengthmsg)+'.';
     
-//        if(lengthmsg > 4 ){
-//          resi = resi.substring((lengthmsg-5),lengthmsg)+'.';
-//        }
-//        else{
-//          resi = resi+'.';
-//        }
         AllResi = readList()+ resi;
         
-//        EEPROM.begin(512);
+        EEPROM.begin(512);
         for (int i = 0; i < AllResi.length(); ++i)
             {
               EEPROM.write(111 + i, AllResi[i]);
@@ -160,10 +154,10 @@ if (myBot.getNewMessage(msg))
         myBot.sendMessage(GroupID, msgi);
       }
 
-      else if (command == "/noreceived")
+      else if (command == "/notreceived")
       {
         isreceive = false;
-        String state="Status Receive : No Receive";
+        String state="Status Receive : Not Yet";
         snprintf (msgi, MSG_BUFFER_SIZE, "%s",state.c_str());
         myBot.sendMessage(GroupID, msgi);
       }
@@ -178,17 +172,18 @@ if (myBot.getNewMessage(msg))
         String Resi = "\n"+String(i+1)+". --"+getValue(AllResi,'.',i);
         NoResi+=Resi;
         }
+        NoResi = NoResi.substring(0,NoResi.length()-1);
       String state="Device ID : " + DevID + "/" + GroupID + 
         "\nStatus BOX : "+(isopen ? "Open" : "Close")+
         "\nStatus Receive : "+(isreceive ? "Success" : "Not Yet");
         snprintf (msgi, MSG_BUFFER_SIZE, "%s\nList:%s",state.c_str(),NoResi.c_str() );
         myBot.sendMessage(GroupID, msgi);
       }
-       else if (command=="/clear")
+       else if (command=="/clearlist")
       {
         clearList();
 //        myBot.sendMessage(GroupID, "Hi, " + (String)msg.sender.firstName + "\nKamu berhasil membersihkan list resi");
-        String state = "Hi, " + (String)msg.sender.firstName + "\nKamu berhasil membersihkan list resi";
+        String state = "Hi, " + (String)msg.sender.firstName + "\nList resi telah dihapus";
         snprintf (msgi, MSG_BUFFER_SIZE,  state.c_str() );
         myBot.sendMessage(GroupID, msgi);
       }
