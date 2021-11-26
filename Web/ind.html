@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script>
+        var video = document.querySelector("#video-webcam");
+
+        navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia || navigator.oGetUserMedia;
+
+        if (navigator.getUserMedia) {
+            navigator.getUserMedia({ video: true }, handleVideo, videoError);
+        }
+
+        function handleVideo(stream) {
+            video.src = window.URL.createObjectURL(stream);
+            console.log(stream);
+        }
+
+        function videoError(e) {
+            // do something
+            alert("Izinkan menggunakan webcam untuk demo!")
+        }
+
+        function takeSnapshot() {
+            var img = document.createElement('img');
+            var context;
+            var width = video.offsetWidth
+                , height = video.offsetHeight;
+
+            canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+
+            context = canvas.getContext('2d');
+            context.drawImage(video, 0, 0, width, height);
+
+            img.src = canvas.toDataURL('image/png');
+            document.body.appendChild(img);
+        }
+
+    </script>
+</head>
+
+<body>
+
+    <div class="">
+        <video autoplay="true" id="video-webcam">
+            Izinkan untuk Mengakses Webcam untuk Demo
+        </video>
+        <button onclick="takeSnapshot()">Ambil Gambar</button>
+    </div>
+</body>
+
+
+</html>
