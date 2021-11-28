@@ -410,6 +410,9 @@ void bokuOpen()
   servo.write(0);
   delay(100);
   isopen = true;
+  
+    client.publish(pub_user.c_str(), "Box Open");
+    client.publish(pub_courier.c_str(), "Box Open");
   blinking();
 }
 
@@ -421,6 +424,8 @@ void bokuClose()
   servo.write(80);
   delay(100);
   isopen = false;
+  client.publish(pub_user.c_str(), "Box Close");
+    client.publish(pub_courier.c_str(), "Box Close");
   blinking();
 }
 
@@ -558,9 +563,9 @@ void createWebServer()
                   debugln("writing eeprom Password App:"); //10 char
                   for (int i = 0; i < qpassapp.length(); ++i)
                   {
-                    EEPROM.write(111 + i, qpin[i]);
+                    EEPROM.write(111 + i, qpassapp[i]);
                     debug("Wrote: ");
-                    debugln(qpin[i]);
+                    debugln(qpassapp[i]);
                   }
                   debugln("writing eeprom address:"); //100 char
                   for (int i = 0; i < qaddress.length(); ++i)

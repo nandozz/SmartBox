@@ -19,6 +19,7 @@ bool restarting = false;
 bool reseting = false;
 unsigned long loopCount = 0;
 unsigned long timert = 0;
+String requestBy,commands,resi;
 
 
 void callback(char *topic, byte *payload, unsigned int length)
@@ -35,7 +36,8 @@ void callback(char *topic, byte *payload, unsigned int length)
   }
   debugln();
   msg = String(code);
-// msg = courier add 12345
+// msg = boku add 12345
+// msg = courier noresi
   String requestBy = getValue(msg, ' ', 0);
   String commands = getValue(msg, ' ', 1);
   String resi = getValue(msg, ' ', 2);
@@ -45,12 +47,6 @@ void callback(char *topic, byte *payload, unsigned int length)
   debugln("word 2 = " + getValue(msg, ' ', 2));
 
   ////////////////////////////////////// Bokuno //////////////////////////////////////////////
-  //if (isopen && (currentMillis - lastTime >= interval)) {
-  //     debug(lastTime);
-  //  debug("     ");
-  //  debugln(currentMillis);
-  //    bokuClose();
-  //  }
 
   if (requestBy == passApp || requestBy == "BokunoHero")
   {
@@ -59,17 +55,23 @@ void callback(char *topic, byte *payload, unsigned int length)
 
     if (commands == "add")
     {
+
+      readList();
+        resi = resi.substring((resi.length()-5),resi.length())+'.';
+        resi.toUpperCase();      
       addResi(countL,"MQTT", resi);
 
-      NoResi = "";
+     readList();
+        NoResi = "";
         for (int i = 0; i < countL; i++)
         {
           String Resi = "\n" + String(i + 1) + ". --" + getValue(AllResi, '.', i);
           NoResi += Resi;
         }
-        NoResi = NoResi.substring(0, NoResi.length() - 1);
-      readList();
-      sendStatus(NoResi);
+     NoResi = NoResi.substring(0, NoResi.length()-1);
+    
+     snprintf (msgi, MSG_BUFFER_SIZE, "List %s",NoResi.c_str() );
+     client.publish(pub_user.c_str(),msgi);
     }
     /////////////////// OPEN //////////////////////
     else if (commands == "open")
@@ -103,15 +105,17 @@ void callback(char *topic, byte *payload, unsigned int length)
     //////////////////// List ///////////////////
     else if (commands == "listView" || commands == "ping")
     {
-      NoResi = "";
+      readList();
+        NoResi = "";
         for (int i = 0; i < countL; i++)
         {
           String Resi = "\n" + String(i + 1) + ". --" + getValue(AllResi, '.', i);
           NoResi += Resi;
         }
-      NoResi = NoResi.substring(0, NoResi.length() - 1);
-      readList();
-      sendStatus(NoResi);
+     NoResi = NoResi.substring(0, NoResi.length()-1);
+    
+     snprintf (msgi, MSG_BUFFER_SIZE, "List %s",NoResi.c_str() );
+     client.publish(pub_user.c_str(),msgi);
     }
 
     //////////////////// CLEAR ///////////////////
@@ -126,13 +130,15 @@ void callback(char *topic, byte *payload, unsigned int length)
   ////////////////////////////// COURIER ///////////////////////////////////
   else if (requestBy == "courier")
   {
-    //courier noresi
-//  String requestBy = getValue(msg, ' ', 0);
-//  String commands = getValue(msg, ' ', 1);
+
+// msg = boku add 12345
+// msg = courier noresi
+//  String requestBy.c_str() = getValue(msg, ' ', 0);
+//  String getValue(msg, ' ', 1) = getValue(msg, ' ', 1);
 //  String resi = getValue(msg, ' ', 2);
     if (AllResi.indexOf(commands) > 0)
     {
-      debugln("Match" + AllResi);
+      debugln("Match" + AllResi + " to "+commands);
       bokuOpen();
 //      myBot.sendMessage(GroupID, "--- Received From MQTT---\nID: ---" + commands);
       //          isreceive = true;
@@ -145,6 +151,7 @@ void callback(char *topic, byte *payload, unsigned int length)
     else if (commands == "ping")
     {
       readAddress();
+      
     }
     else if (commands == "done")
     {
@@ -227,7 +234,7 @@ void loop()
     digitalWrite(LED_BUILTIN, HIGH);
     delay(100);
     allkey += key;
-    checked = false;
+//    checked = false;
 
     debugln("allkey:" + allkey);
   }
@@ -237,7 +244,7 @@ void loop()
     bokuClose();
     allkey = "";
   }
-  else if (allkey.length() == 5 && !checked)
+  else if (allkey.length() == 5)
   {
     debugln("in length:" + allkey);
     if (AllResi.indexOf(allkey) >= 0)
@@ -257,10 +264,7 @@ void loop()
       bokuOpen();
       allkey = "";
     }
-    else
-    {
-      checked = true;
-    }
+   
   }
 
   else if (allkey == "#" + PIN + "#")
@@ -277,7 +281,6 @@ void loop()
   if (myBot.getNewMessage(msg))
   {
     String Name = (String)msg.sender.firstName;
-
     String msgTelegram = msg.text;
     // msgTelegram = /add baju 12345
     
@@ -327,7 +330,8 @@ void loop()
       else if (msgTelegram.indexOf("myprofile") > 0)
       {
         String state = "Device ID : " + DevID + "\nGroup ID : " + GroupID +
-                       "\nPIN : " + PIN.c_str();
+                       "\nPIN : " + PIN.c_str()+
+                       "\npassApp : " + passApp.c_str();
         snprintf(msgi, MSG_BUFFER_SIZE, "%s", state.c_str());
         myBot.sendMessage(GroupID, msgi);
       }
