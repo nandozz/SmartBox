@@ -68,8 +68,8 @@ void callback(char *topic, byte *payload, unsigned int length)
           NoResi += Resi;
         }
         NoResi = NoResi.substring(0, NoResi.length() - 1);
-      sendStatus(countL, NoResi);
       readList();
+      sendStatus(NoResi);
     }
     /////////////////// OPEN //////////////////////
     else if (commands == "open")
@@ -110,7 +110,8 @@ void callback(char *topic, byte *payload, unsigned int length)
           NoResi += Resi;
         }
       NoResi = NoResi.substring(0, NoResi.length() - 1);
-      sendStatus(countL, NoResi);
+      readList();
+      sendStatus(NoResi);
     }
 
     //////////////////// CLEAR ///////////////////
@@ -125,12 +126,21 @@ void callback(char *topic, byte *payload, unsigned int length)
   ////////////////////////////// COURIER ///////////////////////////////////
   else if (requestBy == "courier")
   {
+    //courier noresi
 //  String requestBy = getValue(msg, ' ', 0);
 //  String commands = getValue(msg, ' ', 1);
 //  String resi = getValue(msg, ' ', 2);
     if (AllResi.indexOf(commands) > 0)
     {
+      debugln("Match" + AllResi);
       bokuOpen();
+//      myBot.sendMessage(GroupID, "--- Received From MQTT---\nID: ---" + commands);
+      //          isreceive = true;
+
+      delay(5000);
+      bokuClose();
+      allkey = "";
+      
     }
     else if (commands == "ping")
     {
@@ -188,6 +198,7 @@ void setup()
 
   client.setServer(mqtt_server, 1883);
   client.setCallback(callback);
+//  readList();
 }
 
 void loop()
@@ -269,27 +280,31 @@ void loop()
 
     String msgTelegram = msg.text;
     // msgTelegram = /add baju 12345
-
     
-
     if (msg.group.id == GroupID)
     {
       String item = getValue(msgTelegram, ' ', 1);
       String resi = getValue(msgTelegram, ' ', 2);
 
       /////////////////////////////MESSAGE FROM GROUP TELEGRAM///////////////////////////////////////
+      
       if (msgTelegram.indexOf("add") > 0 && resi.length() > 4)
       {
+        readList();
+        resi = resi.substring((resi.length()-5),resi.length())+'.';
+        resi.toUpperCase();
         addResi(countL,item,resi);
+
+        readList();
         NoResi = "";
         for (int i = 0; i < countL; i++)
         {
           String Resi = "\n" + String(i + 1) + ". --" + getValue(AllResi, '.', i);
           NoResi += Resi;
         }
-        NoResi = NoResi.substring(0, NoResi.length() - 1);
-      sendStatus(countL, NoResi);
-        readList();
+        NoResi = NoResi.substring(0, NoResi.length()-1);
+        sendStatus(NoResi);
+        
       }
       
 
@@ -327,6 +342,7 @@ void loop()
 
       else if (msgTelegram.indexOf("status") > 0)
       {
+        readList();
         NoResi = "";
         for (int i = 0; i < countL; i++)
         {
@@ -334,8 +350,7 @@ void loop()
           NoResi += Resi;
         }
         NoResi = NoResi.substring(0, NoResi.length() - 1);
-        sendStatus(countL, NoResi);
-      
+        sendStatus(NoResi);
       }
       else if (msgTelegram.indexOf("clearlist") > 0)
       {

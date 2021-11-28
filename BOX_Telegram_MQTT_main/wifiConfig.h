@@ -289,39 +289,11 @@ void clearList()
 {
   EEPROM.begin(512);
   // write a 0 to all 512 bytes of the EEPROM
-  for (int i = 111; i < 512; i++)
+  for (int i = 221; i < 512; i++)
   {
     EEPROM.write(i, 0);
   }
   EEPROM.end();
-}
-void readList()
-{
-  String enoResi = "";
-  for (int i = 221; i < 251; ++i)
-  {
-    enoResi += char(EEPROM.read(i));
-  }
-  debugln();
-  debug("No. Paket : ");
-  debug(enoResi + " ");
-  //  debugln(enoResi.length());
-  //  AllResi = enoResi.c_str();
-  delay(100);
-
-  
-  AllResi = enoResi.c_str();
-  int found = 0;
-  int maxIndex = AllResi.length() - 1;
-
-  for (int i = 0; i <= maxIndex; i++)
-  {
-    if (AllResi.charAt(i) == '.' || i == maxIndex)
-    {
-      found++;
-    }
-  }
-  countL = found;
 }
 
 String readAddress(){
@@ -345,15 +317,39 @@ String readAddress(){
   
 }
 
+void readList()
+{
+  String enoResi = "";
+  for (int i = 221; i < 251; ++i)
+  {
+    enoResi += char(EEPROM.read(i));
+  }
+  debugln();
+  debug("No. Paket : ");
+  debug(enoResi + " ");
+  
+  AllResi = enoResi.c_str();
+  delay(100);
+
+  countL = 0;
+  int maxIndex = AllResi.length()-1;
+
+  for (int i = 0; i <= maxIndex; i++)
+  {
+    if (AllResi.charAt(i) == '.' || i == maxIndex)
+    {
+      countL++;
+    }
+  }
+  
+}
+
 void addResi(int countL,String commands, String resi){
         if (countL < 5)
         {
           debugln("Save No.Resi : " + resi);
-          resi = resi.substring((lengthmsg - 5), lengthmsg) + '.';
-          resi.toUpperCase();
-
           AllResi += resi;
-
+          
           EEPROM.begin(512);
           for (int i = 0; i < AllResi.length(); ++i)
           {
@@ -362,6 +358,7 @@ void addResi(int countL,String commands, String resi){
           }
 
           EEPROM.commit();
+          resi = resi.substring(0, resi.length()-1);
 
           snprintf(msgi, MSG_BUFFER_SIZE, "%s - %s\nBerhasil terdaftar", commands.c_str(), resi.c_str());
           myBot.sendMessage(GroupID, msgi);
@@ -372,7 +369,7 @@ void addResi(int countL,String commands, String resi){
         }
 }
 
-void sendStatus(int countL, String NoResi){
+void sendStatus(String NoResi){
   
         String state = "Device ID : " + DevID + "/" + GroupID +
                        "\nStatus BOX : " + (isopen ? "Open" : "Close") +
@@ -487,8 +484,8 @@ void createWebServer()
 
                 content += "      <input type=\"text\" name=\"groupid\" placeholder=\" Group ID\" maxlength=\"10\" required>\n";
                 content += st;
-                content += "      <input type=\"text\" name=\"address\" placeholder=\" Address\" maxlength=\"100\" required>\n";
                 content += "      <input type=\"text\" name=\"pass\" placeholder=\" Password WiFi\" required>\n";
+                content += "      <input type=\"text\" name=\"address\" placeholder=\" Address\" maxlength=\"100\" required>\n";
                 content += "      <input type=\"text\" name=\"pin\" placeholder=\"PIN Device\" pattern=\"[0-9]{5}\"  maxlength=\"5\" required>\n";
                 content += "      <input type=\"text\" name=\"password\" placeholder=\"create password App\" maxlength=\"10\" required>\n";
                 content += "      <button type=\"submit\" >SAVE</button> \n";
