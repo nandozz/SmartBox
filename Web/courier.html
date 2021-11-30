@@ -9,6 +9,9 @@
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.js" type="text/javascript">
 	</script>
 
+	<script src="jquery.min.js"></script>
+	<script src="instascan.min.js"></script>
+
 	<script type="text/javascript" language="javascript">
 		var mqtt;
 		var reconnectTimeout = 2000;
@@ -138,22 +141,46 @@
 </head>
 
 <body>
-	<h1>Box</h1>
+	<h1>Scan Pakcage</h1>
 	<br>
+	<video id="preview" width="300" height="300"></video>
 	<br>
 
 	<label for="devID">Box ID : </label><label type="text" id="devID"> </label> <!-- onkeyup="MQTTconnect();" -->
 	<br> <br>
 	<label id="sub">Make sure the Box ID is correct </label>
 	<br>
-	<br>
-	<label for="code">Code : </label><input type="text" id="code">
 
+	<label for="code">No Resi</label>
+	<input type="text" id="code" name="name" placeholder="Input Barcode Resi">
 	<button type="button" onclick="onOpen();">Open</button>
 
 	<script>
 		MQTTconnect();
 	</script>
 </body>
+
+<script type="text/javascript" language="javascript">
+	function handleSubmit() {
+		const code = document.getElementById('code').value;
+		localStorage.setItem("NAME", code);
+		return;
+	}
+
+	let scanner = new Instascan.Scanner({ video: document.getElementById('preview') });
+	scanner.addListener('scan', function (content) {
+		// alert(content);
+		$("#code").val(content);
+	});
+	Instascan.Camera.getCameras().then(function (cameras) {
+		if (cameras.length > 0) {
+			scanner.start(cameras[0]);
+		} else {
+			console.error('No cameras found');
+		}
+	}).catch(function (e) {
+		console.error(e);
+	});
+</script>
 
 </html>
