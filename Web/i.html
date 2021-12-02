@@ -1,0 +1,88 @@
+<!-- !https://www.youtube.com/watch?v=0eV-tf-W2rQ&t=353s -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+  <link rel="stylesheet" href="style.css">
+
+  <title>Document</title>
+  <script src="jquery.min.js"></script>
+  <script src="instascan.min.js"></script>
+
+
+
+</head>
+
+<body>
+  <video id="preview" width="200" height="200"></video>
+  <input type="text" name="name" placeholder="Box ID" required="">
+
+  <div class="container">
+    <div class="row justify-content-center mt-5">
+      <div class="col-md-5">
+        <div class="card-header bg-transparent mb-0">
+
+
+
+          <div class="main">
+            <input type="checkbox" id="chk" aria-hidden="true">
+            <div class="signup">
+              <form>
+                <label for="chk" aria-hidden="true">My Box</label>
+
+
+                <input type="text" name="txt" placeholder="Box ID" required="">
+                <input type="email" name="email" placeholder="Key" required="">
+                <input type="password" name="pswd" placeholder="No. Resi" required="">
+                <button>Add</button>
+              </form>
+            </div>
+
+            <div class="login">
+              <form action="courier.html" method="GET">
+                <label for="chk" aria-hidden="true">Courier</label>
+                <input type="text" name="name" placeholder="Box ID" required="">
+                <button type="submit" onclick="handleSubmit()">Connect</button>
+              </form>
+            </div>
+          </div>
+
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+</body>
+
+<script type="text/javascript" language="javascript">
+  function handleSubmit() {
+    const name = document.getElementById('name').value;
+    localStorage.setItem("NAME", name);
+    return;
+  }
+
+  let scanner = new Instascan.Scanner({ video: document.getElementById('preview') });
+  scanner.addListener('scan', function (content) {
+    // alert(content);
+    $("#name").val(content);
+  });
+  Instascan.Camera.getCameras().then(function (cameras) {
+    if (cameras.length > 0) {
+      scanner.start(cameras[1]);
+    } else {
+      console.error('No cameras found');
+    }
+  }).catch(function (e) {
+    console.error(e);
+  });
+</script>
+
+</html>
