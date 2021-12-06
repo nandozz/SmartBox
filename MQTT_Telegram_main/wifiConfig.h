@@ -288,6 +288,8 @@ void clearList(){
     EEPROM.write(i, 0);
   }
   EEPROM.end();
+  myBot.sendMessage(GroupID,"List telah dibersihkan");
+  client.publish(pub_user.c_str(), "List -");
 }
 
 void readAddress(){
@@ -356,11 +358,18 @@ void addResi(int countL,String commands, String resi){
 
           snprintf(msgi, MSG_BUFFER_SIZE, "%s - %s\nBerhasil terdaftar", commands.c_str(), resi.c_str());
           myBot.sendMessage(GroupID, msgi);
+          delay(10);
+          client.publish(pub_courier.c_str(),"List Add");
         }
         else
         {
-          myBot.sendMessage(GroupID, "List penuh");
-        }
+           String state = "List sudah penuh \nClick http://0af0-180-244-162-11.ngrok.io/add.html?name="+DevID+"&key="+Herocode+"&resi=Clear";
+           
+          snprintf(msgi, MSG_BUFFER_SIZE,state.c_str());
+          myBot.sendMessage(GroupID,msgi);
+          delay(10);
+          client.publish(pub_courier.c_str(),"List Full");
+        } 
 }
 
 void sendStatus(String NoResi){
@@ -376,13 +385,12 @@ void sendStatus(String NoResi){
         ///////// MQTT
         snprintf (msgi, MSG_BUFFER_SIZE, "List %s",NoResi.c_str() );
         client.publish(pub_user.c_str(),msgi);
+        client.publish(pub_courier.c_str(),msgi);
       delay(100);
 }
 
 void blinking(){
   for(int i = 0;i<2;i++){
-
-    
   delay(300);
     digitalWrite(LED_BUILTIN, LOW);
      delay(100);

@@ -1,5 +1,5 @@
 //12/3/21
-#define DEBUG 0
+#define DEBUG 1
 #if DEBUG == 1
 #define debug(x) Serial.print(x)
 #define debugln(x) Serial.println(x)
@@ -47,7 +47,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
       readList();
         resi = resi.substring((resi.length()-5),resi.length())+'.';
 //        resi.toUpperCase();      
-      addResi(countL,"MQTT", resi);
+      addResi(countL,"New List", resi);
 
      readList();
         NoResi = "";
@@ -64,17 +64,17 @@ void callback(char* topic, byte* payload, unsigned int length) {
     
     }
     /////////////////// OPEN //////////////////////
-    else if (getValue(msg, ' ', 1) == "open"){
+    else if (commands == "open"){
     bokuOpen("");
     }
     //////////////////// CLOSE ///////////////////
-    else if (getValue(msg, ' ', 1) == "close"){
+    else if (commands == "close"){
     bokuClose();
     }
    
     
     //////////////////// RESTART ///////////////////
-    else if (getValue(msg, ' ', 1) == "restart"){
+    else if (commands == "restart"){
        client.publish(pub_user.c_str(), "RESTART DONE");
        delay(1000);
     debugln("Boku restart");
@@ -82,7 +82,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
     }
     
     //////////////////// RESET ///////////////////
-    else if (getValue(msg, ' ', 1) == "reset"){
+    else if (commands == "reset"){
        client.publish(pub_user.c_str(), "RESET DONE");
        delay(1000);
     debugln("Boku reset");
@@ -90,7 +90,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
     }
     
     //////////////////// List ///////////////////
-     else if (getValue(msg, ' ', 1) == "listView" || getValue(msg, ' ', 1) == "ping"){
+     else if (commands == "LIST" || commands == "ping"){
       readList(); 
       readAddress(); 
       NoResi = "";
@@ -104,8 +104,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
     }
     
     //////////////////// CLEAR ///////////////////
-     else if (getValue(msg, ' ', 1) == "listClear"){
-       client.publish(pub_user.c_str(), "List -");
+     else if (commands == "CLEAR"){
        clearList();
       debugln("Boku No.Resi Clear");
       readList();
@@ -188,26 +187,69 @@ void loop() {
   char key = keypad.getKey();
 
  if (key){
+ 
   digitalWrite(LED_BUILTIN, LOW);
      delay(100);
      digitalWrite(LED_BUILTIN, HIGH);
      delay(100);
     allkey += key;
     debugln(allkey);
-    
-    if (allkey == PIN || allkey == NoResi){
-        debugln("Open");
-        bokuOpen("");
-        blinking();
-        allkey="";
-   }
-   else if (key == '*' || key == '#'){
-    debugln("Reset");
+ }
+    if (key == '*')
+  {
+   debugln("Reset Key");
     bokuClose();
     blinking();
     allkey="";
   }
+  else if (allkey.length() == 5)
+  {
+    debugln("in length:" + allkey);
+    if (AllResi.indexOf(allkey) >= 0)
+    {
+      debugln("Match" + AllResi);
+      bokuOpen("");
+      myBot.sendMessage(GroupID, "--- Received ---\nID: ---" + allkey);
+      //          isreceive = true;
+
+      delay(5000);
+      bokuClose();
+      allkey = "";
+    }
+    else if (allkey == PIN)
+    {
+        debugln("Open");
+        bokuOpen("");
+        blinking();
+        allkey="";
+    }
+   
   }
+
+  else if (allkey == "#" + PIN + "#")
+  {
+    myBot.sendMessage(GroupID, "Device ID : " + DevID + "\nGroup ID : " + GroupID + "\n--- Device Reseting ---");
+    resetAll();
+  }
+  else if (allkey.length() > 6)
+  {
+    allkey = "";
+  }
+
+  
+//    if (allkey == PIN || allkey == NoResi){
+//        debugln("Open");
+//        bokuOpen("");
+//        blinking();
+//        allkey="";
+//   }
+//   else if (key == '*' || key == '#'){
+//    debugln("Reset Key");
+//    bokuClose();
+//    blinking();
+//    allkey="";
+//  }
+  
 
 
   if (!client.connected()) {
