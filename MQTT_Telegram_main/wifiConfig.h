@@ -27,12 +27,13 @@ String APpass = "paketbox";       ////
 
 //Variables MQTT
 bool isopen,isreceive = false;
+String Herocode,PIN,NoResi,Address,AllResi = "";
 int i = 0;
 const char* mqtt_server = "broker.hivemq.com";
-String pub_user = "BokuBox/user/"+DevID;
+String pub_user = "BokuBox/"+Herocode+"/"+DevID;
 String pub_courier = "BokuBox/courier/"+DevID;
 String subscriber = "BokuBox/+/"+DevID;
-String Herocode,PIN,NoResi,Address,AllResi = "";
+
 String st,content;
 
 //Variables Telegram
@@ -129,6 +130,7 @@ void wifi_setting()
   debug("Herocode: ");
   debugln(eherocode);
   Herocode = eherocode.c_str();
+  pub_user = "BokuBox/"+Herocode+"/"+DevID;
 
   /////////////////
 
@@ -286,10 +288,10 @@ void clearList(){
   // write a 0 to all 512 bytes of the EEPROM
   for (int i = 221; i < 512; i++) {
     EEPROM.write(i, 0);
-  }
+    }
   EEPROM.end();
   myBot.sendMessage(GroupID,"List telah dibersihkan");
-  client.publish(pub_user.c_str(), "List -");
+  client.publish(pub_user.c_str(), "empty");
 }
 
 void readAddress(){
@@ -359,7 +361,7 @@ void addResi(int countL,String commands, String resi){
           snprintf(msgi, MSG_BUFFER_SIZE, "%s - %s\nBerhasil terdaftar", commands.c_str(), resi.c_str());
           myBot.sendMessage(GroupID, msgi);
           delay(10);
-          client.publish(pub_courier.c_str(),"List Add");
+          client.publish(pub_user.c_str(),"List Add");
         }
         else
         {
@@ -368,7 +370,7 @@ void addResi(int countL,String commands, String resi){
           snprintf(msgi, MSG_BUFFER_SIZE,state.c_str());
           myBot.sendMessage(GroupID,msgi);
           delay(10);
-          client.publish(pub_courier.c_str(),"List Full");
+          client.publish(pub_user.c_str(),"List Full");
         } 
 }
 
@@ -383,9 +385,8 @@ void sendStatus(String NoResi){
         myBot.sendMessage(GroupID, msgi);
 
         ///////// MQTT
-        snprintf (msgi, MSG_BUFFER_SIZE, "List %s",NoResi.c_str() );
+        snprintf (msgi, MSG_BUFFER_SIZE, "List.%s",AllResi.c_str() );
         client.publish(pub_user.c_str(),msgi);
-        client.publish(pub_courier.c_str(),msgi);
       delay(100);
 }
 

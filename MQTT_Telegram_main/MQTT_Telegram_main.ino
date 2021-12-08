@@ -38,10 +38,9 @@ void callback(char* topic, byte* payload, unsigned int length) {
 
   if (requestBy == Herocode || requestBy == "BokunoHero")
   {
-
     //////////////////// ADD ///////////////////
     
-    if (commands == "add"){
+     if (commands == "add"){
       {
 
       readList();
@@ -58,8 +57,6 @@ void callback(char* topic, byte* payload, unsigned int length) {
         }
      NoResi = NoResi.substring(0, NoResi.length()-1);
     
-     snprintf (msgi, MSG_BUFFER_SIZE, "List %s",NoResi.c_str() );
-     client.publish(pub_user.c_str(),msgi);
     }
     
     }
@@ -90,7 +87,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
     }
     
     //////////////////// List ///////////////////
-     else if (commands == "LIST" || commands == "ping"){
+     else if (commands == "list"){
       readList(); 
       readAddress(); 
       NoResi = "";
@@ -102,9 +99,12 @@ void callback(char* topic, byte* payload, unsigned int length) {
      NoResi = NoResi.substring(0, NoResi.length()-1);
      sendStatus(NoResi);
     }
+    else if(commands == "ping"){
+    client.publish(pub_user.c_str(),"connected"); 
+    }
     
     //////////////////// CLEAR ///////////////////
-     else if (commands == "CLEAR"){
+     else if (commands == "clear"){
        clearList();
       debugln("Boku No.Resi Clear");
       readList();
