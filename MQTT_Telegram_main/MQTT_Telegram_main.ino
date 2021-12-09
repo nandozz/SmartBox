@@ -209,11 +209,13 @@ void loop() {
     {
       debugln("Match" + AllResi);
       bokuOpen("");
+      blinking();
       myBot.sendMessage(GroupID, "--- Received ---\nID: ---" + allkey);
       //          isreceive = true;
 
       delay(5000);
       bokuClose();
+      blinking();
       allkey = "";
     }
     else if (allkey == PIN)
@@ -224,6 +226,12 @@ void loop() {
         allkey="";
     }
    
+  }
+  else if (allkey == "##" + PIN)
+  {
+    clearList();
+    debugln("Boku No.Resi Clear");
+    readList();
   }
 
   else if (allkey == "#" + PIN + "#")
