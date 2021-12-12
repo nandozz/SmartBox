@@ -59,6 +59,7 @@ void resetAll(void);
 void blinking(void);
 void readAddress(void);
 String getValue(void);
+void screen(String txt);
 
 //Establishing Local server at port 80 whenever required
 ESP8266WebServer server(80);
@@ -140,7 +141,6 @@ void wifi_setting()
   {
   OTAfunc(esid.c_str(), epass.c_str(),"Boku-esp");
 
-
    myBot.wifiConnect(esid.c_str(), epass.c_str());
 //set Token
     myBot.setTelegramToken(token);
@@ -149,10 +149,6 @@ void wifi_setting()
     if (myBot.testConnection())
     {
       debugln("Success to connect");
-      
-//      snprintf(msgi, MSG_BUFFER_SIZE, "%s - %s\nBerhasil terdaftar", commands.c_str(), resi.c_str());
-//          myBot.sendMessage(GroupID, msgi);
-      
       myBot.sendMessage(GroupID, "Device : " + DevID + "\nKey :" + Herocode + "\nGroupID : " + GroupID + "\n--- Device Ready ---");
       
 //      myBot.sendMessage(GroupID, "GroupID : " + GroupID + "\nDevice : " + DevID + "\nKey : " + Herocode +  "\n--- Device Ready ---");
@@ -160,19 +156,19 @@ void wifi_setting()
       //buzzer("success");
     }
     
-  blinking();
+    blinking();
     debugln("Succesfully Connected!!!");
     return;
   }
   else
-  {u8g2.clearBuffer();          // clear the internal memory
-   u8g2.setFont(u8g2_font_logisoso28_tr);  // choose a suitable font at https://github.com/olikraus/u8g2/wiki/fntlistall
-   u8g2.drawStr(8,29,"192.168.4.1");  // write something to the internal memory
-   u8g2.sendBuffer();         // transfer internal memory to the display
-   delay(10);
-   
-   blinking();
-  blinking();
+  {
+  u8g2.clearBuffer();          // clear the internal memory
+  u8g2.setFont(u8g2_font_crox5h_tr);  // choose a suitable font at https://github.com/olikraus/u8g2/wiki/fntlistall
+  u8g2.drawStr(3, 25, "192.168.4.1"); // write something to the internal memory  
+  u8g2.sendBuffer();         // transfer internal memory to the display
+  delay(10);
+    blinking();
+    blinking();
     debugln("Turning the HotSpot On");
     launchWeb();
     setupAP();// Setup HotSpot

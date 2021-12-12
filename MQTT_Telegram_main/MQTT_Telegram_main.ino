@@ -179,7 +179,8 @@ void setup() {
   u8g2.begin();
   u8g2.clearBuffer();          // clear the internal memory
   u8g2.setFont(u8g2_font_crox5h_tr);  // choose a suitable font at https://github.com/olikraus/u8g2/wiki/fntlistall
-  u8g2.drawStr(18, 29, "Processing"); // write something to the internal memory
+  u8g2.drawStr(3, 25, "Processing"); // write something to the internal memory
+  
   u8g2.sendBuffer();         // transfer internal memory to the display
   delay(10);
 
@@ -194,9 +195,23 @@ void setup() {
   client.setServer(mqtt_server, 1883);
   client.setCallback(callback);
   readList();
+  String txt;
+  for(int i=25;i<100;i++){
+    txt = String(i) ; 
+    snprintf(msgi, MSG_BUFFER_SIZE,"%s ", txt.c_str());
   u8g2.clearBuffer();          // clear the internal memory
-  u8g2.setFont(u8g2_font_logisoso28_tr);  // choose a suitable font at https://github.com/olikraus/u8g2/wiki/fntlistall
-  u8g2.drawStr(18, 29, "Ready"); // write something to the internal memory
+  u8g2.setFont(u8g2_font_crox5h_tr);  // choose a suitable font at https://github.com/olikraus/u8g2/wiki/fntlistall
+  u8g2.drawStr(45, 25, msgi); // write something to the internal memory
+  u8g2.drawStr(75, 25, "%");
+  
+  u8g2.sendBuffer();         // transfer internal memory to the display
+  delay(10);
+ 
+  }  delay(100);
+  u8g2.clearBuffer();          // clear the internal memory
+  u8g2.setFont(u8g2_font_crox5h_tr);  // choose a suitable font at https://github.com/olikraus/u8g2/wiki/fntlistall
+  u8g2.drawStr(15, 25, "Complete"); // write something to the internal memory
+  
   u8g2.sendBuffer();         // transfer internal memory to the display
   delay(10);
 }
