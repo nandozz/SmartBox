@@ -44,6 +44,7 @@ int GroupID,statusCode,countL,lengthmsg;
 //ESP1
 //int LED_BUILTIN = 0;
 //int resetButton = 2;
+
 //ESP8266 12E
 //int LED_BUILTIN = 2;
 //int resetButton = 4;
@@ -164,7 +165,13 @@ void wifi_setting()
     return;
   }
   else
-  {blinking();
+  {u8g2.clearBuffer();          // clear the internal memory
+   u8g2.setFont(u8g2_font_logisoso28_tr);  // choose a suitable font at https://github.com/olikraus/u8g2/wiki/fntlistall
+   u8g2.drawStr(8,29,"192.168.4.1");  // write something to the internal memory
+   u8g2.sendBuffer();         // transfer internal memory to the display
+   delay(10);
+   
+   blinking();
   blinking();
     debugln("Turning the HotSpot On");
     launchWeb();
@@ -284,6 +291,9 @@ void resetAll(){
   ESP.restart();
 }
 void clearList(){
+
+    debugln("Clear List");
+    
   EEPROM.begin(512);
   // write a 0 to all 512 bytes of the EEPROM
   for (int i = 221; i < 512; i++) {
@@ -406,6 +416,11 @@ void bokuOpen(String commands){
   isopen = true;
 //  unsigned long currentMillis = millis();
 //  lastTime = currentMillis; //open begin
+snprintf(msgi, MSG_BUFFER_SIZE, "OPEN");
+   u8g2.clearBuffer();          // clear the internal memory
+   u8g2.setFont(u8g2_font_logisoso28_tr);  // choose a suitable font at https://github.com/olikraus/u8g2/wiki/fntlistall
+   u8g2.drawStr(8,29,msgi);  // write something to the internal memory
+   u8g2.sendBuffer();         // transfer internal memory to the display
   debugln("Box Open");
     delay(10);
     servo.write(0);
@@ -424,6 +439,12 @@ void bokuOpen(String commands){
 
 void bokuClose(){
   isopen = false;
+  snprintf(msgi, MSG_BUFFER_SIZE, "CLOSE");
+   u8g2.clearBuffer();          // clear the internal memory
+   u8g2.setFont(u8g2_font_logisoso28_tr);  // choose a suitable font at https://github.com/olikraus/u8g2/wiki/fntlistall
+   u8g2.drawStr(8,29,msgi);  // write something to the internal memory
+   u8g2.sendBuffer();         // transfer internal memory to the display
+ 
   debugln("Box Close");
     delay(10);
     servo.write(80);
@@ -607,4 +628,14 @@ String getValue(String data, char separator, int index)
   }
 
   return found > index ? data.substring(strIndex[0], strIndex[1]) : "";
+}
+
+void screen(String txt){
+  snprintf(msgi, MSG_BUFFER_SIZE, txt.c_str());
+    debugln("show "+txt);
+    u8g2.clearBuffer();          // clear the internal memory
+    u8g2.setFont(u8g2_font_logisoso28_tr);  // choose a suitable font at https://github.com/olikraus/u8g2/wiki/fntlistall
+    u8g2.drawStr(3, 29, msgi); // write something to the internal memory
+    u8g2.sendBuffer();         // transfer internal memory to the display
+    delay(10);
 }

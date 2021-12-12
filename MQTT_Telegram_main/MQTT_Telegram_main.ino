@@ -8,10 +8,18 @@
 #define debugln(x)
 #endif
 
+#include <Arduino.h>
+#include <U8g2lib.h>
+#include <SPI.h>
+
+U8G2_SSD1306_128X32_UNIVISION_F_HW_I2C u8g2(U8G2_R0);
+
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
 #include "wifiConfig.h";
 #include "keypadConfig.h"
+
+
 
 void callback(char* topic, byte* payload, unsigned int length) {
   String code = "";
@@ -28,109 +36,111 @@ void callback(char* topic, byte* payload, unsigned int length) {
   String requestBy = getValue(msg, ' ', 0);
   String commands = getValue(msg, ' ', 1);
   String resi = getValue(msg, ' ', 2);
-  
-  debugln("word 0 = "+requestBy);
-  debugln("word 1 = "+commands);
-  debugln("word 2 = "+resi);
-  
-////////////////////////////////////// Bokuno //////////////////////////////////////////////
+
+  debugln("word 0 = " + requestBy);
+  debugln("word 1 = " + commands);
+  debugln("word 2 = " + resi);
+
+  ////////////////////////////////////// Bokuno //////////////////////////////////////////////
 
 
   if (requestBy == Herocode || requestBy == "BokunoHero")
   {
     //////////////////// ADD ///////////////////
-    
-     if (commands == "add"){
+
+    if (commands == "add") {
       {
 
-      readList();
-        resi = resi.substring((resi.length()-5),resi.length())+'.';
-//        resi.toUpperCase();      
-      addResi(countL,"New List", resi);
+        readList();
+        resi = resi.substring((resi.length() - 5), resi.length()) + '.';
+        //        resi.toUpperCase();
+        addResi(countL, "New List", resi);
 
-     readList();
+        readList();
         NoResi = "";
         for (int i = 0; i < countL; i++)
         {
           String Resi = "\n" + String(i + 1) + ". --" + getValue(AllResi, '.', i);
           NoResi += Resi;
         }
-     NoResi = NoResi.substring(0, NoResi.length()-1);
-    
-    }
-    
+        NoResi = NoResi.substring(0, NoResi.length() - 1);
+
+      }
+
     }
     /////////////////// OPEN //////////////////////
-    else if (commands == "open"){
-    bokuOpen("");
+    else if (commands == "open") {
+      bokuOpen("");
     }
     //////////////////// CLOSE ///////////////////
-    else if (commands == "close"){
-    bokuClose();
+    else if (commands == "close") {
+      bokuClose();
     }
-   
-    
+
+
     //////////////////// RESTART ///////////////////
-    else if (commands == "restart"){
-       client.publish(pub_user.c_str(), "RESTART DONE");
-       delay(1000);
-    debugln("Boku restart");
-    ESP.restart();
+    else if (commands == "restart") {
+        screen("RESTART");
+      client.publish(pub_user.c_str(), "RESTART DONE");
+      delay(1000);
+      debugln("Boku restart");
+      ESP.restart();
     }
-    
+
     //////////////////// RESET ///////////////////
-    else if (commands == "reset"){
-       client.publish(pub_user.c_str(), "RESET DONE");
-       delay(1000);
-    debugln("Boku reset");
-    resetAll();
+    else if (commands == "reset") {
+      client.publish(pub_user.c_str(), "RESET DONE");
+      delay(1000);
+      debugln("Boku reset");
+      resetAll();
     }
-    
+
     //////////////////// List ///////////////////
-     else if (commands == "list"){
-      readList(); 
-      readAddress(); 
+    else if (commands == "list") {
+      readList();
+      readAddress();
       NoResi = "";
-        for (int i = 0; i < countL; i++)
-        {
-          String Resi = "\n" + String(i + 1) + ". --" + getValue(AllResi, '.', i);
-          NoResi += Resi;
-        }
-     NoResi = NoResi.substring(0, NoResi.length()-1);
-     sendStatus(NoResi);
+      for (int i = 0; i < countL; i++)
+      {
+        String Resi = "\n" + String(i + 1) + ". --" + getValue(AllResi, '.', i);
+        NoResi += Resi;
+      }
+      NoResi = NoResi.substring(0, NoResi.length() - 1);
+      sendStatus(NoResi);
     }
-    else if(commands == "ping"){
-    client.publish(pub_user.c_str(),"connected"); 
+    else if (commands == "ping") {
+      client.publish(pub_user.c_str(), "connected");
     }
-    
+
     //////////////////// CLEAR ///////////////////
-     else if (commands == "clear"){
-       clearList();
+    else if (commands == "clear") {
+      clearList();
       debugln("Boku No.Resi Clear");
       readList();
     }
     blinking();
-    
 
-////////////////////////////// COURIER ///////////////////////////////////
-  }else if (getValue(msg, ' ', 0) == "courier"){
+
+    ////////////////////////////// COURIER ///////////////////////////////////
+  } else if (getValue(msg, ' ', 0) == "courier") {
     readList();
-    if (AllResi.indexOf(commands) >= 0){
-    bokuOpen(commands);
-    delay(5000);
-    bokuClose();
-    allkey = "";
-    isreceive = true;
-    
+    if (AllResi.indexOf(commands) >= 0) {
+      bokuOpen(commands);
+      delay(5000);
+      bokuClose();
+      allkey = "";
+      isreceive = true;
+
     }
-    else if(commands == "ping"){
-     readAddress();
+    else if (commands == "ping") {
+      readAddress();
     }
-    else if(commands == "done"){
+    else if (commands == "done") {
       bokuClose();
     }
     blinking();
-    
+    screen("No. Resi");
+
   }
 }
 
@@ -160,48 +170,60 @@ void reconnect() {
     }
   }
 }
- 
+
 void setup() {
-  
+
   Serial.begin(115200); //Initialising if(DEBUG)Serial Monitor
   Wire.begin();
   keypad.begin();
-  pinMode(BUILTIN_LED, OUTPUT);     // Initialize the BUILTIN_LED pin as an output
- servo.attach(2); //D4
- servo.write(80);
+  u8g2.begin();
 
-delay(800);
+  pinMode(BUILTIN_LED, OUTPUT);     // Initialize the BUILTIN_LED pin as an output
+  servo.attach(2); //D4
+  servo.write(80);
+
+  delay(800);
 
   wifi_setting();
-    delay(1000);
+  delay(1000);
   client.setServer(mqtt_server, 1883);
   client.setCallback(callback);
   readList();
+  u8g2.clearBuffer();          // clear the internal memory
+  u8g2.setFont(u8g2_font_logisoso28_tr);  // choose a suitable font at https://github.com/olikraus/u8g2/wiki/fntlistall
+  u8g2.drawStr(18, 29, "Ready"); // write something to the internal memory
+  u8g2.sendBuffer();         // transfer internal memory to the display
+  delay(10);
 }
 
 void loop() {
   ArduinoOTA.handle();
 
-//  readkeypad();
+  //  readkeypad();
 
   char key = keypad.getKey();
 
- if (key){
- 
-  digitalWrite(LED_BUILTIN, LOW);
-     delay(100);
-     digitalWrite(LED_BUILTIN, HIGH);
-     delay(100);
+  if (key) {
+
+    digitalWrite(LED_BUILTIN, LOW);
+    delay(100);
+    digitalWrite(LED_BUILTIN, HIGH);
+    delay(100);
     allkey += key;
     debugln(allkey);
- }
     if (key == '*')
-  {
-   debugln("Reset Key");
-    bokuClose();
-    blinking();
-    allkey="";
+    {
+    allkey = allkey.substring(0, allkey.length() - 2);
+    }
+   
+   if (allkey.length() <= 0) {
+      bokuClose();
+      blinking();
+      allkey = "No. Resi";
+    }
+    screen(allkey);
   }
+  
   else if (allkey.length() == 5)
   {
     debugln("in length:" + allkey);
@@ -217,52 +239,49 @@ void loop() {
       bokuClose();
       blinking();
       allkey = "";
+      screen("No. Resi");
     }
     else if (allkey == PIN)
     {
-        debugln("Open");
-        bokuOpen("");
-        blinking();
-        allkey="";
+      debugln("Open");
+      bokuOpen("");
+      blinking();
+      allkey = "";
+      
     }
-   
+
   }
-  else if (allkey == "##" + PIN)
+  if (allkey == "##" + PIN)
   {
+    screen("Clear");
+    blinking();
     clearList();
     debugln("Boku No.Resi Clear");
     readList();
+    screen("No. Resi");
+    
   }
 
   else if (allkey == "#" + PIN + "#")
-  {
+  {screen("RESET");
+  delay(2000);
+    blinking();
     myBot.sendMessage(GroupID, "Device ID : " + DevID + "\nGroup ID : " + GroupID + "\n--- Device Reseting ---");
+    screen("DONE");
     resetAll();
   }
-  else if (allkey.length() > 6)
+  if (allkey.length() > 6)
   {
     allkey = "";
+    screen("No. Resi");
   }
 
-  
-//    if (allkey == PIN || allkey == NoResi){
-//        debugln("Open");
-//        bokuOpen("");
-//        blinking();
-//        allkey="";
-//   }
-//   else if (key == '*' || key == '#'){
-//    debugln("Reset Key");
-//    bokuClose();
-//    blinking();
-//    allkey="";
-//  }
-  
+
 
 
   if (!client.connected()) {
     reconnect();
   }
-  client.loop();  
+  client.loop();
 
 }
