@@ -177,6 +177,11 @@ void setup() {
   Wire.begin();
   keypad.begin();
   u8g2.begin();
+  u8g2.clearBuffer();          // clear the internal memory
+  u8g2.setFont(u8g2_font_crox5h_tr);  // choose a suitable font at https://github.com/olikraus/u8g2/wiki/fntlistall
+  u8g2.drawStr(18, 29, "Processing"); // write something to the internal memory
+  u8g2.sendBuffer();         // transfer internal memory to the display
+  delay(10);
 
   pinMode(BUILTIN_LED, OUTPUT);     // Initialize the BUILTIN_LED pin as an output
   servo.attach(2); //D4
@@ -214,12 +219,11 @@ void loop() {
     if (key == '*')
     {
     allkey = allkey.substring(0, allkey.length() - 2);
-    }
-   
-   if (allkey.length() <= 0) {
+    if (allkey.length() <= 0) {
       bokuClose();
       blinking();
       allkey = "No. Resi";
+      }
     }
     screen(allkey);
   }
