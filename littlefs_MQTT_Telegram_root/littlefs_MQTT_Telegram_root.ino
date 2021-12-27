@@ -1,5 +1,5 @@
 //12/3/21
-#define DEBUG 0
+#define DEBUG 1
 #if DEBUG == 1
 #define debug(x) Serial.print(x)
 #define debugln(x) Serial.println(x)
@@ -11,6 +11,8 @@
 #include <Arduino.h>
 #include <U8g2lib.h>
 #include <SPI.h>
+
+
 
 U8G2_SSD1306_128X32_UNIVISION_F_HW_I2C u8g2(U8G2_R0);
 
@@ -52,7 +54,8 @@ void callback(char* topic, byte* payload, unsigned int length) {
       {
 
         readList();
-        resi = resi.substring((resi.length() - 5), resi.length()) + '.';
+//        resi = resi.substring((resi.length() - 5), resi.length()) + '.';
+        resi = resi + '.';
         //        resi.toUpperCase();
         addResi(countL, "New List", resi);
 
@@ -60,11 +63,12 @@ void callback(char* topic, byte* payload, unsigned int length) {
         NoResi = "";
         for (int i = 0; i < countL; i++)
         {
-          String Resi = "\n" + String(i + 1) + ". --" + getValue(AllResi, '.', i);
+          String Resi = "\n" + String(i + 1) + ". " + getValue(AllResi, '.', i);
           NoResi += Resi;
         }
         NoResi = NoResi.substring(0, NoResi.length() - 1);
-        sendStatus(NoResi);
+        sendStatus("List",NoResi);
+        //dataupdate = true;
         
 
       }
@@ -101,8 +105,8 @@ void callback(char* topic, byte* payload, unsigned int length) {
 
     //////////////////// List ///////////////////
     else if (commands == "list") {
-      readList();
-      readAddress();
+//      readList();
+//      readAddress();
       NoResi = "";
       for (int i = 0; i < countL; i++)
       {
@@ -110,39 +114,82 @@ void callback(char* topic, byte* payload, unsigned int length) {
         NoResi += Resi;
       }
       NoResi = NoResi.substring(0, NoResi.length() - 1);
-      sendStatus(NoResi);
+      sendStatus("List",NoResi);
+      //dataupdate = true;
     }
-    else if (commands == "ping") {
-      client.publish(pub_user.c_str(), "connected");
-      readList();
-      readAddress();
+    else if (commands == "history") {
+      readHistory();
       NoResi = "";
-      for (int i = 0; i < countL; i++)
+        for (int i = 0; i < countH; i++)
       {
-        String Resi = "\n" + String(i + 1) + ". --" + getValue(AllResi, '.', i);
+        String Resi = "\n" + String(i + 1) + ". --" + getValue(History, '.', i);
         NoResi += Resi;
       }
       NoResi = NoResi.substring(0, NoResi.length() - 1);
-      sendStatus(NoResi);
+      sendStatus("History",NoResi);
+      //dataupdate = true;
+    }
+    
+   if (commands == "ping" || dataupdate) {
+      client.publish(pub_user.c_str(), "connected");
+        readList();
+        delay(10);
+        readHistory();
+        delay(10);
+        readAddress();
+        delay(10);
+
+        NoResi = "";
+        for (int i = 0; i < countL; i++)
+        {
+          String Resi = "\n" + String(i + 1) + ". " + getValue(AllResi, '.', i);
+          NoResi += Resi;
+        }
+        NoResi = NoResi.substring(0, NoResi.length() - 1);
+        sendStatus( "List", NoResi);
+        
+//    dataupdate = false;
+
+
     }
 
     //////////////////// CLEAR ///////////////////
-    else if (commands == "clear") {
+    else if (commands == "clearlist") {
       clearList();
       debugln("Boku No.Resi Clear");
       readList();
     }
+     else if (commands == "clearhis") {
+      clearHistory();
+      debugln("Boku History Clear");
+      readHistory();
+    }
     blinking();
 
 
+
+
     ////////////////////////////// COURIER ///////////////////////////////////
-  } else if (getValue(msg, ' ', 0) == "courier") {
+  } else if (requestBy == "courier") {
     readList();
     if (AllResi.indexOf(commands) >= 0) {
       bokuOpen(commands);
       delay(7000);
       bokuClose();
       allkey = "";
+
+      commands = commands + '.';
+      addHis(countH,commands);
+      readHistory();
+      NoResi = "";
+        for (int i = 0; i < countH; i++)
+      {
+        String Resi = "\n" + String(i + 1) + ". --" + getValue(History, '.', i);
+        NoResi += Resi;
+      }
+      NoResi = NoResi.substring(0, NoResi.length() - 1);
+      sendStatus("History",NoResi);
+      //dataupdate = true;
       isreceive = true;
 
     }
@@ -160,7 +207,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
 
 void reconnect() {
   // Loop until we're reconnected
-  client.setServer(mqtt_server, 1883);
+  client.setServer(mqtt_server.c_str(), 1883);
   client.setCallback(callback);
   while (!client.connected()) {
     debug("Attempting MQTT connection...");
@@ -188,6 +235,10 @@ void reconnect() {
 void setup() {
 
   Serial.begin(115200); //Initialising if(DEBUG)Serial Monitor
+  if(!LittleFS.begin()){
+    debugln("An Error has occurred while mounting LittleFS");
+    return;
+  }
   Wire.begin();
   keypad.begin();
   u8g2.begin();
@@ -206,8 +257,8 @@ void setup() {
 
   wifi_setting();
   delay(1000);
-  client.setServer(mqtt_server, 1883);
-  client.setCallback(callback);
+//  client.setServer(mqtt_server.c_str(), 1883);
+//  client.setCallback(callback);
   readList();
   String txt;
   for(int i=25;i<100;i++){
@@ -232,7 +283,6 @@ void setup() {
 
 void loop() {
   ArduinoOTA.handle();
-
   //  readkeypad();
 
   char key = keypad.getKey();
@@ -285,6 +335,17 @@ void loop() {
       delay(5000);
       bokuClose();
       blinking();
+
+  
+
+
+      readHistory();
+      allkey = allkey + '.';
+      addHis(countH,allkey);
+      readHistory();
+      sendStatus("List",NoResi);
+      //dataupdate = true;
+      
       allkey = "";
       screen("No. Resi");
     }

@@ -1,0 +1,18 @@
+{
+  "DeviceID": "A1234",
+  "APoint": "BokuBox",
+  "APpas": "paketbox",
+  "IP": "192.168.4.1",
+  "username": "NANDO",
+  "password": "Hivemq123",
+  "broker": "broker.hivemq.com",
+  "SSL": false,
+  "PORT": "8884",
+  "token": "1954149109:AAHtt10ZRb4SwET3RGDFFXg_efCs3PI3d4I",
+  "pubuser": "BokuBox/",
+  "pubcourier": "BokuBox/courier/",
+  "subscriber": "BokuBox/+/",
+  "version": "v.1",
+  "productID": "A1234-121221-1",
+  "warantyvalid": "12-3-22"
+}

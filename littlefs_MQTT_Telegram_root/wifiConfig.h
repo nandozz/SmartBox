@@ -3,7 +3,8 @@
 CTBot myBot;
 #include "Utilities.h"
 #include "OTA.h";
-// #include <ESP8266WiFi.h>
+#include "LittleFS.h"
+#include <ArduinoJson.h>
 #include <ESP8266HTTPClient.h>
 #include <ESP8266WebServer.h>
 #include <ESP8266mDNS.h>
@@ -26,20 +27,19 @@ String APpass = "paketbox";       ////
 ////////////////////////////////////////////////////
 
 //Variables MQTT
-bool isopen,isreceive = false;
-String Herocode,PIN,NoResi,Address,AllResi = "";
+bool isopen, isreceive,dataupdate = false;
+String Herocode, PIN, NoResi, Address, AllResi,User, History = "";
 int i = 0;
-const char* mqtt_server = "broker.hivemq.com";
-String pub_user = "BokuBox/"+Herocode+"/"+DevID;
-String pub_courier = "BokuBox/courier/"+DevID;
-String subscriber = "BokuBox/+/"+DevID;
+String mqtt_server = "broker.hivemq.com";
+String pub_user = "BokuBox/" + Herocode + "/" + DevID;
+String pub_courier = "BokuBox/courier/" + DevID;
+String subscriber = "BokuBox/+/" + DevID;
 
-
-String st,content;
+String st, content,SSIDwifi, PassWifi;
 
 //Variables Telegram
 String token = "1954149109:AAHtt10ZRb4SwET3RGDFFXg_efCs3PI3d4I"; // REPLACE myToken WITH YOUR TELEGRAM BOT TOKEN
-int GroupID,statusCode,countL,lengthmsg;
+int GroupID, statusCode, countL, countH, lengthmsg;
 
 
 //ESP1
@@ -62,6 +62,25 @@ void readAddress(void);
 String getValue(void);
 void screen(String txt);
 
+///////////
+
+void clearList(void);
+void clearHistory(void);
+void readList(void);
+void readHistory(void);
+//void addResi(int countL, String commands, String resi);
+//void sendStatus(String NoResi)
+void blinking(void);
+//void bokuOpen(String commands)
+void bokuClose(void);
+void createWebServer(void);
+//String getValue(String data, char separator, int index)
+//void screen(String txt)
+
+
+
+//////////q
+
 //Establishing Local server at port 80 whenever required
 ESP8266WebServer server(80);
 
@@ -70,104 +89,149 @@ void wifi_setting()
   debugln();
   debugln("Disconnecting previously connected WiFi");
   WiFi.disconnect();
-  EEPROM.begin(512); //Initialasing EEPROM
+
   delay(10);
   pinMode(LED_BUILTIN, OUTPUT);
   digitalWrite(LED_BUILTIN, LOW);
-//  pinMode(LED_BUILTIN, OUTPUT);
-//  digitalWrite(LED_BUILTIN, HIGH);
-//  pinMode(resetButton, INPUT);
-//  digitalWrite(resetButton, HIGH);
+  //  pinMode(LED_BUILTIN, OUTPUT);
+  //  digitalWrite(LED_BUILTIN, HIGH);
+  //  pinMode(resetButton, INPUT);
+  //  digitalWrite(resetButton, HIGH);
   debugln();
   debugln();
   debugln("Startup");
 
-  //---------------------------------------- Read eeprom for ssid and pass
-//  debugln("Reading EEPROM ssid");
-  String esid;
-  for (int i = 0; i < 32; ++i)
-  {
-    esid += char(EEPROM.read(i));
+  debugln("=============config.json==============");
+  // READ Config FIle
+  File rconf = LittleFS.open("/config.json", "r");
+//      while(rconf.available()){
+//      Serial.write(rconf.read());
+//    }
+  if (!rconf) {
+    debugln("Failed to open config for reading");
+    return;
   }
-  debugln();
-  debug("SSID: ");
-  debugln(esid);
+  StaticJsonDocument<192> doc;
+  DeserializationError error = deserializeJson(doc, rconf);
+  // Test if parsing succeeds.
+  if (error) {
+    debug(F("deserializeJson() failed: "));
+    debugln(error.f_str());
+    return;
+  }
+    const char* UID = doc["UID"]; // "-1231231"
+    const char* SSIDs = doc["SSID"]; // "WIFI"
+    const char* wfpas = doc["wfpas"]; // "qwerqwer"
+    const char* key = doc["key"]; // "pas"
+    const char* pin = doc["PIN"]; // "12345"
+    const char* address = doc["address"]; // "Perumahan...."
+
+//  debugln(SSIDs);
+//  debugln(wfpas);
+//  debugln(address);
+
+  rconf.close();
+  debugln("============Config Close===============");
+
+  debugln("=============product.json==============");
+  // READ Product FIle
+  File rprod = LittleFS.open("/product.json", "r");
+//      while(rprod.available()){
+//      Serial.write(rprod.read());
+//    }
+  if (!rprod) {
+    debugln("Failed to open  rprod for reading");
+    return;
+  }
+  //Open the  prod
+    StaticJsonDocument<768> pro;
+    error = deserializeJson(pro,rprod);
+  // Test if parsing succeeds.
+  if (error) {
+    debug(F("deserializeJson() failed: "));
+    debugln(error.f_str());
+    return;
+  }
+    const char* DeviceID = pro["DeviceID"]; // "A1234"
+    const char* APoint = pro["APoint"]; // "BokuBox"
+    const char* APpas = pro["APpas"]; // "paketbox"
+    const char* IP = pro["IP"]; // "192.168.4.1"
+    const char* username = pro["username"]; // "NANDO"
+    const char* password = pro["password"]; // "Hivemq123"
+    const char* broker = pro["broker"]; // "broker.hivemq.com"
+    bool SSL = pro["SSL"]; // false
+    const char* PORT = pro["PORT"]; // "8884"
+    const char* tokenTG = pro["token"]; // "Telegram BOT"
+    const char* pubuser = pro["pubuser"]; // "BokuBox/"
+    const char* pubcourier = pro["pubcourier"]; // "BokuBox/courier/"
+    const char* subs = pro["subscriber"]; // "BokuBox/+/"
+    const char* ver = pro["version"]; // "v.1"
+    const char* productID = pro["productID"]; // "A1234-121221-1"
+    const char* warantyvalid = pro["warantyvalid"]; // "12-3-22"
+
+//  debugln(username);
+//  debugln(tokenTG);
+//  debugln(warantyvalid);
+ 
+   rprod.close();
+  debugln("============Product Close===============");
+
+  ///////////////////////////Setup global variable////////////////////////////////////////
+  DevID = DeviceID;      //Production code
+  AP = String(APoint) + " " + String(DeviceID);
+  APpass = String(APpas);
+
+  GroupID = String(UID).toInt();
+  token = tokenTG;
   
-//  debugln("Reading EEPROM pass");
-  String epass = "";
-  for (int i = 32; i < 96; ++i)
-  {
-    epass += char(EEPROM.read(i));
-  }
-  debug("PASS: ");
-  debugln(epass);
+  PIN = pin;
+  Herocode = key;
+  Address = address;
+ 
+  pub_user = pubuser + Herocode + "/" + DevID;
+  pub_courier = pubcourier + DevID;
+  subscriber = subs + DevID;
+  mqtt_server = broker;
 
-  //  debugln("Reading EEPROM groupid");
-  String egroupid = "";
-  for (int i = 96; i < 106; ++i)
-  {
-    egroupid += char(EEPROM.read(i));
-  }
-  debug("GroupID: ");
-  debugln(egroupid);
-  GroupID = egroupid.toInt();
+  SSIDwifi=SSIDs;
+  PassWifi=wfpas;
+  
+//  debugln(SSIDwifi);
+//  debugln(PassWifi);
 
 
-  ////////////////////////////////////////////////////// PIN
-  //  debugln("Reading EEPROM PIN");
-  String epin = "";
-  for (int i = 106; i < 111; ++i)
-  {
-    epin += char(EEPROM.read(i));
-  }
-  debug("PIN: ");
-  debugln(epin);
-  PIN = epin.c_str();
-
-  //  debugln("Reading EEPROM herocode");
-  String eherocode = "";
-  for (int i = 111; i < 121; ++i)
-  {
-    eherocode += char(EEPROM.read(i));
-  }
-  debug("Herocode: ");
-  debugln(eherocode);
-  Herocode = eherocode.c_str();
-  pub_user = "BokuBox/"+Herocode+"/"+DevID;
-
-  /////////////////
-
-  WiFi.begin(esid.c_str(), epass.c_str());
+  WiFi.begin(SSIDwifi.c_str(),PassWifi.c_str());
+  debugln("WiFi Begin");
   if (testWifi())
   {
-  OTAfunc(esid.c_str(), epass.c_str(),"Boku-esp");
+    OTAfunc(SSIDwifi.c_str(), PassWifi.c_str(), "Boku-esp");
 
-   myBot.wifiConnect(esid.c_str(), epass.c_str());
-//set Token
+    myBot.wifiConnect(SSIDwifi.c_str(), PassWifi.c_str());
+    //set Token
     myBot.setTelegramToken(token);
 
-//Connection wifi check
+    //Connection wifi check
     if (myBot.testConnection())
     {
       debugln("Success to connect");
-      myBot.sendMessage(GroupID, "Device : " + DevID + "\nKey :" + Herocode + "\nGroupID : " + GroupID + "\n--- Device Ready ---");
-      
-//      myBot.sendMessage(GroupID, "GroupID : " + GroupID + "\nDevice : " + DevID + "\nKey : " + Herocode +  "\n--- Device Ready ---");
+      myBot.sendMessage(GroupID, "Device : " + DevID + "\nKey : " + Herocode + "\nGroupID : " + GroupID + "\n--- Device Ready ---");
+
+      //      myBot.sendMessage(GroupID, "GroupID : " + GroupID + "\nDevice : " + DevID + "\nKey : " + Herocode +  "\n--- Device Ready ---");
       //    digitalWrite(Relay, LOW);
       //buzzer("success");
     }
-    
+
     blinking();
     debugln("Succesfully Connected!!!");
     return;
   }
   else
   {
-  u8g2.clearBuffer();          // clear the internal memory
-  u8g2.setFont(u8g2_font_crox5h_tr);  // choose a suitable font at https://github.com/olikraus/u8g2/wiki/fntlistall
-  u8g2.drawStr(3, 25, "192.168.4.1"); // write something to the internal memory  
-  u8g2.sendBuffer();         // transfer internal memory to the display
-  delay(10);
+    u8g2.clearBuffer();          // clear the internal memory
+    u8g2.setFont(u8g2_font_crox5h_tr);  // choose a suitable font at https://github.com/olikraus/u8g2/wiki/fntlistall
+    u8g2.drawStr(3, 25, "192.168.4.1"); // write something to the internal memory
+    u8g2.sendBuffer();         // transfer internal memory to the display
+    delay(10);
     blinking();
     blinking();
     debugln("Turning the HotSpot On");
@@ -179,24 +243,24 @@ void wifi_setting()
   debugln("Waiting.");
   int h = 0;
   while ((WiFi.status() != WL_CONNECTED))
-  { 
+  {
     debug(".");
     delay(100);
     server.handleClient();
     delay(500);
     h++;
-    if ( h > 600 ){
+    if ( h > 600 ) {
       ESP.restart();
     }
-    
-    
+
+
   }
 
 }
 
 
 
-//----------------------------------------------- Fuctions used for WiFi credentials saving and connecting to it which you do not need to change 
+//----------------------------------------------- Fuctions used for WiFi credentials saving and connecting to it which you do not need to change
 bool testWifi(void)
 {
   int c = 0;
@@ -278,67 +342,97 @@ void setupAP(void)
   
 }
 
-void resetAll(){
-  EEPROM.begin(512);
-  // write a 0 to all 512 bytes of the EEPROM
-  for (int i = 0; i < 512; i++) {
-    EEPROM.write(i, 0);
-  }
-  EEPROM.end();
+void resetAll() {
+  File list = LittleFS.open("/list.txt", "w+");
+  list.print("");
+  delay(10);
+  list.close();
+  delay(10);
+  File his = LittleFS.open("/history.json", "w+");
+  his.print("");
+  delay(10);
+  his.close();
+  delay(10);
+  
+  StaticJsonDocument<768> doc;
+  doc["UID"] = "-465154529";
+  doc["SSID"] = "WIFI";
+  doc["wfpas"] = "password";
+  doc["key"] = "pas";
+  doc["PIN"] = "12345";
+  doc["address"] = "Blok A1.1";
+
+  // write to file
+  File wconf = LittleFS.open("/config.json", "w+");
+  serializeJson(doc, wconf);
+  serializeJsonPretty(doc, Serial);
+  wconf.println();
+  wconf.close();
+  delay(10);
   ESP.restart();
 }
-void clearList(){
 
-    debugln("Clear List");
-    
-  EEPROM.begin(512);
-  // write a 0 to all 512 bytes of the EEPROM
-  for (int i = 221; i < 512; i++) {
-    EEPROM.write(i, 0);
-    }
-  EEPROM.end();
-  myBot.sendMessage(GroupID,"List telah dibersihkan");
-  client.publish(pub_user.c_str(), "empty");
+
+void readAddress() {
+  debug("Address: ");
+  debugln(Address);
+
+  snprintf (msgi, MSG_BUFFER_SIZE, "Address : %s", Address.c_str() );
+  client.publish(pub_user.c_str(), msgi);
+  delay(100);
+  client.publish(pub_courier.c_str(), msgi);
+
 }
 
-void readAddress(){
-  String eaddress = "";
-  for (int i = 121; i < 221; ++i)
-  {
-    eaddress += char(EEPROM.read(i));
-  }
-  delay(5);
-  debugln();
-  debug("Address: ");
-  debugln(eaddress);
-//  Address = eaddress.c_str();
+void clearList() {
 
+  debugln("Clear List");
+  File clis = LittleFS.open("/list.txt", "w+");
 
-      snprintf (msgi, MSG_BUFFER_SIZE, "Address : %s",eaddress.c_str() );
-   client.publish(pub_user.c_str(),msgi);
-   delay(100);
-   client.publish(pub_courier.c_str(),msgi);   
-//   Address = "";
-//   return  Address;
-  
+  //Write to the file
+  clis.print("");
+  delay(1);
+  //Close the lis
+  clis.close();
+
+  myBot.sendMessage(GroupID, "List telah dibersihkan");
+  client.publish(pub_user.c_str(), "listempty");
+}
+
+void clearHistory() {
+
+  debugln("Clear History");
+  File chis = LittleFS.open("/history.txt", "w+");
+
+  //Write to the file
+  chis.print("");
+  delay(1);
+  //Close the chis
+  chis.close();
+
+  myBot.sendMessage(GroupID, "History telah dibersihkan");
+  client.publish(pub_user.c_str(), "historyempty");
 }
 
 void readList()
 {
-  String enoResi = "";
-  for (int i = 221; i < 251; ++i)
-  {
-    enoResi += char(EEPROM.read(i));
+  File rlis = LittleFS.open("/list.txt", "r");
+  if (!rlis) {
+    //Read the rlis data and display it on LCD
+    debugln("list.txt doesn't exist!");
+    return;
   }
+  AllResi = rlis.readString();
+  debugln(AllResi);
+  rlis.close();
+
   debugln();
-  debug("No. Paket : ");
-  debug(enoResi + " ");
-  
-  AllResi = enoResi.c_str();
+  debug("List Content: ");
+  debug(AllResi);
   delay(100);
 
   countL = 0;
-  int maxIndex = AllResi.length()-1;
+  int maxIndex = AllResi.length() - 1;
 
   for (int i = 0; i <= maxIndex; i++)
   {
@@ -346,109 +440,168 @@ void readList()
     {
       countL++;
     }
-  }  
+  }
 }
 
-void addResi(int countL,String commands, String resi){
-        if (countL < 5)
-        {
-          debugln("Save No.Resi : " + resi);
-          AllResi += resi;
-          
-          EEPROM.begin(512);
-          for (int i = 0; i < AllResi.length(); ++i)
-          {
-            EEPROM.write(221 + i, AllResi[i]);
-            debugln("Wrote: " + AllResi[i]);
-          }
+void readHistory()
+{
+  ///READ HISTORY
+  File rhis = LittleFS.open("/history.txt", "r");
+  if (!rhis) {
+    //Read the rhis data and display it on LCD
+    debugln("history.txt doesn't exist!");
+    return;
+  }
+  History = rhis.readString();
+  rhis.close();
+  debugln();
+  debug("History Content: ");
+  debug(History);
+  delay(100);
+ countH = 0;
+  int maxIndex = History.length() - 1;
 
-          EEPROM.commit();
-          resi = resi.substring(0, resi.length()-1);
-
-          snprintf(msgi, MSG_BUFFER_SIZE, "%s - %s\nBerhasil terdaftar", commands.c_str(), resi.c_str());
-          myBot.sendMessage(GroupID, msgi);
-          delay(10);
-          client.publish(pub_user.c_str(),"List Add");
-        }
-        else
-        {
-           String state = "List sudah penuh \nClick http://0af0-180-244-162-11.ngrok.io/add.html?name="+DevID+"&key="+Herocode+"&resi=Clear";
-           
-          snprintf(msgi, MSG_BUFFER_SIZE,state.c_str());
-          myBot.sendMessage(GroupID,msgi);
-          delay(10);
-          client.publish(pub_user.c_str(),"List Full");
-        } 
+  for (int i = 0; i <= maxIndex; i++)
+  {
+    if (History.charAt(i) == '.' || i == maxIndex)
+    {
+      countH++;
+    }
+  }
 }
 
-void sendStatus(String NoResi){
+
+
+void addResi(int countL, String commands, String resi)
+{
+  if (countL < 10)
+  {
+    //Open the file
+    File alis = LittleFS.open("/list.txt", "a+");
+
+    //Write to the file
+    alis.print(resi);
+    delay(10);
+    //Close the alis
+    alis.close();
+
+    debugln("Add successfuly");
+    resi = resi.substring(0, resi.length() - 1);
+    snprintf(msgi, MSG_BUFFER_SIZE, "%s - %s\nBerhasil terdaftar", commands.c_str(), resi.c_str());
+    myBot.sendMessage(GroupID, msgi);
+    delay(10);
+    client.publish(pub_user.c_str(), "List Add");
+  }
+  else
+  {
+    String state = "List Full \nPlease Clear yout list to add new resi \nhttp://mybox-trial.web.app/";
+
+    snprintf(msgi, MSG_BUFFER_SIZE, state.c_str());
+    myBot.sendMessage(GroupID, msgi);
+    delay(10);
+    client.publish(pub_user.c_str(), "List Full");
+  }
+}
+
+void addHis(int countH, String resi)
+{
+  if (countH < 10)
+  {
+    //Open the file
+    File ahis = LittleFS.open("/history.txt", "a+");
+
+    //Write to the file
+    ahis.print(resi);
+    delay(1);
+    //Close the alis
+    ahis.close();
+
+    debugln("Add History successfuly");
+    resi = resi.substring(0, resi.length() - 1);
+    delay(10);
+
+  }
+  else
+  {
+    String state = "List Full \nPlease Clear yout list to add new resi \nhttp://mybox-trial.web.app/";
+
+    snprintf(msgi, MSG_BUFFER_SIZE, state.c_str());
+    myBot.sendMessage(GroupID, msgi);
+    delay(10);
+    client.publish(pub_user.c_str(), "List Full");
+  }
+}
+
+void sendStatus(String listof,String NoResi) {
   
-        String state = "Device ID : " + DevID + "/" + GroupID +
-                       "\nStatus BOX : " + (isopen ? "Open" : "Close") +
-                       "\nStatus Receive : " + (isreceive ? "Success" : "Not Yet");
+      String state = "Device ID : " + DevID + "/" + GroupID +
+                 "\nStatus BOX : " + (isopen ? "Open" : "Close") +
+                 "\nStatus Receive : " + (isreceive ? "Success" : "Not Yet");
 
-        ////////// Telegram
-        snprintf(msgi, MSG_BUFFER_SIZE, "%s\nList:%s", state.c_str(), NoResi.c_str());
-        myBot.sendMessage(GroupID, msgi);
+  ////////// Telegram
+  snprintf(msgi, MSG_BUFFER_SIZE, "%s\n%s:%s", state.c_str(),listof.c_str(), NoResi.c_str());
+  myBot.sendMessage(GroupID, msgi);
 
-        ///////// MQTT
-        snprintf (msgi, MSG_BUFFER_SIZE, "List.%s",AllResi.c_str() );
-        client.publish(pub_user.c_str(),msgi);
-      delay(100);
+  ///////// MQTT
+  snprintf (msgi, MSG_BUFFER_SIZE, "List.%s", AllResi.c_str() );
+  client.publish(pub_user.c_str(), msgi);
+  snprintf (msgi, MSG_BUFFER_SIZE, "History.%s", History.c_str() );
+  client.publish(pub_user.c_str(), msgi);
+  delay(100);
 }
 
-void blinking(){
-  for(int i = 0;i<2;i++){
-  delay(300);
+void blinking() {
+  for (int i = 0; i < 2; i++) {
+    delay(300);
     digitalWrite(LED_BUILTIN, LOW);
-     delay(100);
-     digitalWrite(LED_BUILTIN, HIGH);
-     delay(100);
+    delay(100);
+    digitalWrite(LED_BUILTIN, HIGH);
+    delay(100);
   }
 
-    debugln("--Blinking LED--");
+  debugln("--Blinking LED--");
 }
 
-void bokuOpen(String commands){
+void bokuOpen(String commands) {
   isopen = true;
-//  unsigned long currentMillis = millis();
-//  lastTime = currentMillis; //open begin
-snprintf(msgi, MSG_BUFFER_SIZE, "OPEN");
-   u8g2.clearBuffer();          // clear the internal memory
-   u8g2.setFont(u8g2_font_logisoso28_tr);  // choose a suitable font at https://github.com/olikraus/u8g2/wiki/fntlistall
-   u8g2.drawStr(8,29,msgi);  // write something to the internal memory
-   u8g2.sendBuffer();         // transfer internal memory to the display
+  //  unsigned long currentMillis = millis();
+  //  lastTime = currentMillis; //open begin
+  snprintf(msgi, MSG_BUFFER_SIZE, "OPEN");
+  u8g2.clearBuffer();          // clear the internal memory
+  u8g2.setFont(u8g2_font_logisoso28_tr);  // choose a suitable font at https://github.com/olikraus/u8g2/wiki/fntlistall
+  u8g2.drawStr(8, 29, msgi); // write something to the internal memory
+  u8g2.sendBuffer();         // transfer internal memory to the display
   debugln("Box Open");
-    delay(10);
-    servo.write(0);
-    delay(200);
+  delay(10);
+  servo.write(0);
+  delay(200);
 
-        ////////// Telegram
-    if(commands.length()>4)
-    {
-        snprintf(msgi, MSG_BUFFER_SIZE, "--- New Received ---\nID: ...%s", commands.c_str());
-        myBot.sendMessage(GroupID, msgi);
-        delay(10);
-    }
-    client.publish(pub_user.c_str(), "{\"state\":\"Box Open\"}");
-    client.publish(pub_courier.c_str(), "{\"state\":\"Box Open\"}");
+  ////////// Telegram
+  if (commands.length() > 4)
+  {
+    snprintf(msgi, MSG_BUFFER_SIZE, "--- New Received ---\nID: ...%s", commands.c_str());
+    myBot.sendMessage(GroupID, msgi);
+    delay(10);
+  }
+  client.publish(pub_user.c_str(), "{\"state\":\"Box Open\"}");
+  client.publish(pub_courier.c_str(), "{\"state\":\"Box Open\"}");
 }
 
-void bokuClose(){
+void bokuClose() {
   isopen = false;
   snprintf(msgi, MSG_BUFFER_SIZE, "CLOSE");
-   u8g2.clearBuffer();          // clear the internal memory
-   u8g2.setFont(u8g2_font_logisoso28_tr);  // choose a suitable font at https://github.com/olikraus/u8g2/wiki/fntlistall
-   u8g2.drawStr(8,29,msgi);  // write something to the internal memory
-   u8g2.sendBuffer();         // transfer internal memory to the display
- 
+  u8g2.clearBuffer();          // clear the internal memory
+  u8g2.setFont(u8g2_font_logisoso28_tr);  // choose a suitable font at https://github.com/olikraus/u8g2/wiki/fntlistall
+  u8g2.drawStr(8, 29, msgi); // write something to the internal memory
+  u8g2.sendBuffer();         // transfer internal memory to the display
+
   debugln("Box Close");
-    delay(10);
-    servo.write(80);
-    delay(200);
-    
-    client.publish(pub_user.c_str(), "Box Close");
-    client.publish(pub_courier.c_str(), "Box Close");
+  delay(10);
+  servo.write(80);
+  delay(200);
+
+  client.publish(pub_user.c_str(), "Box Close");
+  client.publish(pub_courier.c_str(), "Box Close");
 }
 
 void createWebServer()
@@ -627,12 +780,12 @@ String getValue(String data, char separator, int index)
   return found > index ? data.substring(strIndex[0], strIndex[1]) : "";
 }
 
-void screen(String txt){
+void screen(String txt) {
   snprintf(msgi, MSG_BUFFER_SIZE, txt.c_str());
-    debugln("show "+txt);
-    u8g2.clearBuffer();          // clear the internal memory
-    u8g2.setFont(u8g2_font_logisoso28_tr);  // choose a suitable font at https://github.com/olikraus/u8g2/wiki/fntlistall
-    u8g2.drawStr(3, 29, msgi); // write something to the internal memory
-    u8g2.sendBuffer();         // transfer internal memory to the display
-    delay(10);
+  debugln("show " + txt);
+  u8g2.clearBuffer();          // clear the internal memory
+  u8g2.setFont(u8g2_font_logisoso28_tr);  // choose a suitable font at https://github.com/olikraus/u8g2/wiki/fntlistall
+  u8g2.drawStr(3, 29, msgi); // write something to the internal memory
+  u8g2.sendBuffer();         // transfer internal memory to the display
+  delay(10);
 }

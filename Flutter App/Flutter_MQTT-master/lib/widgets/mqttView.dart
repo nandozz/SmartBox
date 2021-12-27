@@ -421,7 +421,9 @@ class _MQTTViewState extends State<MQTTView> {
     if (Platform.isAndroid) {
       osPrefix = 'Flutter_Android';
     }
-    final String _topic = 'Boku/${_bokuIDTextController.text}';
+    final String _topic =
+        'BokuBox/${_bokuPassTextController.text}/${_bokuIDTextController.text}';
+    final String _topiccourier = 'BokuBox/${_bokuIDTextController.text}';
 
     manager = MQTTManager(
         host: 'broker.hivemq.com',
