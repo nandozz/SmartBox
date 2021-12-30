@@ -573,8 +573,12 @@ void bokuOpen(String commands) {
   u8g2.sendBuffer();         // transfer internal memory to the display
   debugln("Box Open");
   delay(10);
+  servo.attach(2); //D4
+   delay(5);
   servo.write(0);
-  delay(200);
+  delay(500);
+  servo.detach();
+  delay(5);
 
   ////////// Telegram
   if (commands.length() > 4)
@@ -596,9 +600,13 @@ void bokuClose() {
   u8g2.sendBuffer();         // transfer internal memory to the display
 
   debugln("Box Close");
-  delay(10);
-  servo.write(80);
-  delay(200);
+  delay(800);
+  servo.attach(2); //D4
+   delay(5);
+  servo.write(120);
+  delay(500);
+  servo.detach();
+  delay(5);
 
   client.publish(pub_user.c_str(), "Box Close");
   client.publish(pub_courier.c_str(), "Box Close");
@@ -647,7 +655,7 @@ void createWebServer()
                 content += "      <input type=\"text\" name=\"pass\" placeholder=\" Password WiFi\" required>\n";
                 content += "      <input type=\"text\" name=\"address\" placeholder=\" Address\" maxlength=\"100\" required>\n";
                 content += "      <input type=\"text\" name=\"pin\" placeholder=\"PIN Device\" pattern=\"[0-9]{5}\"  maxlength=\"5\" required>\n";
-                content += "      <input type=\"text\" name=\"password\" placeholder=\"create password App\" maxlength=\"10\" required>\n";
+                content += "      <input type=\"text\" name=\"key\" placeholder=\"create password App\" maxlength=\"10\" required>\n";
                 content += "      <button type=\"submit\" >SAVE</button> \n";
                 content += "\t</form>   \n";
                 content += "  </div>\n";
@@ -661,76 +669,34 @@ void createWebServer()
     server.on("/setting", []()
               {
                 
-                String qgroupid = server.arg("groupid");
+//                String qgroupid = server.arg("groupid");
                 String qsid = server.arg("ssid");
                 String qpass = server.arg("pass");
-                String qaddress = server.arg("address");
-                String qpassapp = server.arg("password");
-                String qpin = server.arg("pin");
+//                String qaddress = server.arg("address");
+//                String qpassapp = server.arg("key");
+//                String qpin = server.arg("pin");
+
+
+
+///////////////////////////////////////////////////
+ 
                 if (qsid.length() > 0 && qpass.length() > 0)
                 {
-                  debugln("clearing eeprom");
-                  for (int i = 0; i < 221; ++i)
-                  {
-                    EEPROM.write(i, 0);
-                  }
-                  debugln(qsid);
-                  debugln("");
-                  debugln(qpass);
-                  debugln("");
-                  debugln(qgroupid);
-                  debugln("");
-                  debugln(qpassapp);
-                  debugln("");
-                  debugln(qpin);
-                  debugln("");
-                  debugln(qaddress);
-                  debugln("");
-
-                  debugln("writing eeprom ssid:"); //32 char
-                  for (int i = 0; i < qsid.length(); ++i)
-                  {
-                    EEPROM.write(i, qsid[i]);
-                    debug("Wrote: ");
-                    debugln(qsid[i]);
-                  }
-                  debugln("writing eeprom pass:"); //64 char
-                  for (int i = 0; i < qpass.length(); ++i)
-                  {
-                    EEPROM.write(32 + i, qpass[i]);
-                    debug("Wrote: ");
-                    debugln(qpass[i]);
-                  }
-                  debugln("writing eeprom groupid:"); //10 char
-                  for (int i = 0; i < qgroupid.length(); ++i)
-                  {
-                    EEPROM.write(96 + i, qgroupid[i]);
-                    debug("Wrote: ");
-                    debugln(qgroupid[i]);
-                  }
-                  debugln("writing eeprom PIN:"); //5 char
-                  for (int i = 0; i < qpin.length(); ++i)
-                  {
-                    EEPROM.write(106 + i, qpin[i]);
-                    debug("Wrote: ");
-                    debugln(qpin[i]);
-                  }
-                  debugln("writing eeprom Password App:"); //10 char
-                  for (int i = 0; i < qpassapp.length(); ++i)
-                  {
-                    EEPROM.write(111 + i, qpassapp[i]);
-                    debug("Wrote: ");
-                    debugln(qpassapp[i]);
-                  }
-                  debugln("writing eeprom address:"); //100 char
-                  for (int i = 0; i < qaddress.length(); ++i)
-                  {
-                    EEPROM.write(121 + i, qaddress[i]);
-                    debug("Wrote: ");
-                    debugln(qaddress[i]);
-                  }
-
-                  EEPROM.commit();
+                  StaticJsonDocument<768> doc;
+                  doc["UID"] = server.arg("groupid");
+                  doc["SSID"] = server.arg("ssid");
+                  doc["wfpas"] = server.arg("pass");
+                  doc["key"] = server.arg("key");
+                  doc["PIN"] = server.arg("pin");
+                  doc["address"] = server.arg("address");
+                
+                  // write to file
+                  File wconf = LittleFS.open("/config.json", "w+");
+                  serializeJson(doc, wconf);
+                  serializeJsonPretty(doc, Serial);
+                  wconf.println();
+                  wconf.close();
+                  delay(10);
 
                   content = "<!DOCTYPE html>\n";
                   content += "<html>\n";

@@ -251,9 +251,9 @@ void setup() {
 
   pinMode(BUILTIN_LED, OUTPUT);     // Initialize the BUILTIN_LED pin as an output
   servo.attach(2); //D4
-  servo.write(80);
-
-  delay(800);
+  servo.write(120);
+  delay(500);
+  servo.detach();
 
   wifi_setting();
   delay(1000);
@@ -313,32 +313,31 @@ void loop() {
     if (AllResi.indexOf(allkey) >= 0)
     {
       debugln("Match" + AllResi);
+        
       bokuOpen("");
       blinking();
+      
       snprintf(msgi, MSG_BUFFER_SIZE, "Masukan");
    u8g2.clearBuffer();          // clear the internal memory
    u8g2.setFont(u8g2_font_crox5h_tr);  // choose a suitable font at https://github.com/olikraus/u8g2/wiki/fntlistall
    u8g2.drawStr(8,29,msgi);  // write something to the internal memory
    u8g2.sendBuffer();         // transfer internal memory to the display
-  debugln("Box Open");
-    delay(1500);
+    delay(2000);
+    
       snprintf(msgi, MSG_BUFFER_SIZE, "Paketnya");
    u8g2.clearBuffer();          // clear the internal memory
    u8g2.setFont(u8g2_font_crox5h_tr);  // choose a suitable font at https://github.com/olikraus/u8g2/wiki/fntlistall
    u8g2.drawStr(8,29,msgi);  // write something to the internal memory
    u8g2.sendBuffer();         // transfer internal memory to the display
-  debugln("Box Open");
-    delay(100);
+    delay(10);
+    
       myBot.sendMessage(GroupID, "--- Received ---\nID: ---" + allkey);
       //          isreceive = true;
 
       delay(5000);
       bokuClose();
       blinking();
-
-  
-
-
+      
       readHistory();
       allkey = allkey + '.';
       addHis(countH,allkey);

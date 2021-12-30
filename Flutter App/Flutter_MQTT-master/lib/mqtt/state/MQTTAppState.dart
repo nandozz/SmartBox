@@ -6,7 +6,10 @@ class MQTTAppState with ChangeNotifier {
   MQTTAppConnectionState _appConnectionState =
       MQTTAppConnectionState.disconnected;
   String _receivedText = '';
+  String _receivedList = '';
   String _historyText = '';
+  String _id = '';
+  String _key = '';
   bool _isLock = true;
 
   void changeLock(bool isLock) {
@@ -14,9 +17,28 @@ class MQTTAppState with ChangeNotifier {
     notifyListeners();
   }
 
+  void setLogin(String id, String key) {
+    _id = id;
+    _key = key;
+    notifyListeners();
+  }
+
   void setReceivedText(String text) {
     _receivedText = text;
-    _historyText = _historyText + '\n' + _receivedText;
+
+    if (text.contains('List')) {
+      _receivedList = text;
+    } else if (text.contains('listempty')) {
+      _receivedList = 'Empty';
+    }
+
+    if (text.contains('History')) {
+      _historyText = text;
+    } else if (text.contains('historyempty')) {
+      _historyText = 'Empty';
+    }
+
+    // _historyText = _historyText + '\n' + _receivedText;
     notifyListeners();
   }
 
@@ -30,8 +52,11 @@ class MQTTAppState with ChangeNotifier {
     notifyListeners();
   }
 
+  String get getReceivedList => _receivedList;
   String get getReceivedText => _receivedText;
   String get getHistoryText => _historyText;
+  String get getId => _id;
+  String get getKey => _key;
   // String get getClearHistoryText => _historyText;
 
   bool get getState => _isLock;

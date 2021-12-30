@@ -92,7 +92,7 @@ class _MQTTViewState extends State<MQTTView> {
           children: <Widget>[
             // _buildTextFieldWith(_hostTextController, 'Enter broker address',
             //     currentAppState.getAppConnectionState),
-            // const SizedBox(height: 10),
+            // const SizedBox(height: 20),
             const Text(
               'Hero',
               style: TextStyle(fontSize: 25),
@@ -100,40 +100,23 @@ class _MQTTViewState extends State<MQTTView> {
             const SizedBox(height: 35),
             _buildTextFieldWith(_bokuIDTextController, 'Boku ID',
                 currentAppState.getAppConnectionState),
-            const SizedBox(height: 10),
+            const SizedBox(height: 20),
             _buildTextFieldWith(_bokuPassTextController, 'Boku Password',
                 currentAppState.getAppConnectionState),
-            const SizedBox(height: 10),
+            const SizedBox(height: 20),
             _buildConnecteButtonFrom(currentAppState.getAppConnectionState),
-            const SizedBox(height: 10),
-            Row(
-              // ignore: always_specify_types
-              children: [
-                IconButton(
-                  onPressed: () {
-                    currentAppState.getAppConnectionState ==
-                            MQTTAppConnectionState.connected
-                        ? _publishMessage(
-                            '${_bokuPassTextController.text} list')
-                        : _configureAndConnect();
-
-                    final String uplist = currentAppState.getReceivedText;
-                    uplist.split(' ');
-                    print(uplist);
-                    if (uplist[0] == 'uplist') {
-                      print(uplist[1]);
-                    }
-                  },
-                  icon: const Icon(Icons.list_alt),
-                ),
-                const SizedBox(height: 10),
-                const Text('no resi')
-              ],
-            ),
-
-            const SizedBox(height: 10),
+            const SizedBox(height: 20),
             _buildPublishMessageRow(),
-            const SizedBox(height: 10),
+            const SizedBox(height: 20),
+            _clearlist('list', 'clearlist'),
+            const SizedBox(height: 20),
+            _listofresi(currentAppState.getReceivedList),
+            const SizedBox(height: 20),
+            _clearlist('history', 'clearhis'),
+            const SizedBox(height: 20),
+            _listofhistory(currentAppState.getHistoryText),
+
+            const SizedBox(height: 20),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               // ignore: always_specify_types
@@ -238,7 +221,7 @@ class _MQTTViewState extends State<MQTTView> {
                         MQTTAppConnectionState.connected
                     ? _publishMessage(
                         'courier ${_scanBarcodeTextController.text}')
-                    : _configureAndConnect();
+                    : _configureAndConnect(who: 'courier');
               },
               icon: currentAppState.getAppConnectionState ==
                       MQTTAppConnectionState.connected
@@ -252,6 +235,34 @@ class _MQTTViewState extends State<MQTTView> {
           ],
         ),
       ),
+    );
+  }
+
+  Row _clearlist(String reqlist, String clear) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      // ignore: always_specify_types
+      children: [
+        IconButton(
+          onPressed: () {
+            currentAppState.getAppConnectionState ==
+                    MQTTAppConnectionState.connected
+                ? _publishMessage('${_bokuPassTextController.text} $reqlist')
+                : _configureAndConnect();
+          },
+          icon: const Icon(Icons.list_alt),
+        ),
+        const SizedBox(height: 20),
+        IconButton(
+          onPressed: () {
+            currentAppState.getAppConnectionState ==
+                    MQTTAppConnectionState.connected
+                ? _publishMessage('${_bokuPassTextController.text} $clear')
+                : _configureAndConnect();
+          },
+          icon: const Icon(Icons.clear_outlined),
+        ),
+      ],
     );
   }
 
@@ -302,6 +313,52 @@ class _MQTTViewState extends State<MQTTView> {
         ));
   }
 
+  Widget _listofresi(String text) {
+    // final String uplist = currentAppState.getReceivedText;
+    final List<String> arr = text.split('.');
+    print('Data LIST : $arr');
+    if (arr[0] == 'List') {
+      print(text);
+    }
+    // ignore: prefer_const_constructors
+    return Padding(
+      padding: const EdgeInsets.all(20.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: arr.map((String e) {
+          return Text(
+            e,
+            style: const TextStyle(fontSize: 18),
+          );
+        }).toList(),
+      ),
+    );
+  }
+
+  Widget _listofhistory(String text) {
+    // final String uplist = currentAppState.getReceivedText;
+    final List<String> arr = text.split('.');
+    print('Data History : $arr');
+    if (arr[0] == 'History') {
+      print(text);
+    }
+    // ignore: prefer_const_constructors
+    return Padding(
+      padding: const EdgeInsets.all(20.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: arr.map((String e) {
+          return Text(
+            e,
+            style: const TextStyle(fontSize: 18),
+          );
+        }).toList(),
+      ),
+    );
+  }
+
   Widget _buildScrollableTextWith(String text) {
     return Padding(
       padding: const EdgeInsets.all(20.0),
@@ -339,7 +396,7 @@ class _MQTTViewState extends State<MQTTView> {
                 : null, //
           ),
         ),
-        const SizedBox(width: 10),
+        const SizedBox(width: 20),
         Expanded(
           // ignore: deprecated_member_use
           child: RaisedButton(
@@ -414,7 +471,7 @@ class _MQTTViewState extends State<MQTTView> {
     }
   }
 
-  void _configureAndConnect() {
+  void _configureAndConnect({String who = 'user'}) {
     // ignore: flutter_style_todos
     // TODO: Use UUID
     String osPrefix = 'Flutter_iOS';
@@ -423,11 +480,12 @@ class _MQTTViewState extends State<MQTTView> {
     }
     final String _topic =
         'BokuBox/${_bokuPassTextController.text}/${_bokuIDTextController.text}';
-    final String _topiccourier = 'BokuBox/${_bokuIDTextController.text}';
+    final String _topiccourier =
+        'BokuBox/courier/${_bokuIDTextController.text}';
 
     manager = MQTTManager(
         host: 'broker.hivemq.com',
-        topic: _topic,
+        topic: who == 'user' ? _topic : _topiccourier,
         identifier: osPrefix,
         state: currentAppState);
     manager.initializeMQTTClient();
