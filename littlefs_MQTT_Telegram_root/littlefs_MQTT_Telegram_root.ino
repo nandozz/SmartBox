@@ -67,7 +67,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
           NoResi += Resi;
         }
         NoResi = NoResi.substring(0, NoResi.length() - 1);
-        sendStatus("List",NoResi);
+//        sendStatus("List",NoResi);
         //dataupdate = true;
         
 
@@ -114,7 +114,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
         NoResi += Resi;
       }
       NoResi = NoResi.substring(0, NoResi.length() - 1);
-      sendStatus("List",NoResi);
+//      sendStatus("List",NoResi);
       //dataupdate = true;
     }
     else if (commands == "history") {
@@ -126,7 +126,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
         NoResi += Resi;
       }
       NoResi = NoResi.substring(0, NoResi.length() - 1);
-      sendStatus("History",NoResi);
+//      sendStatus("History",NoResi);
       //dataupdate = true;
     }
     
@@ -146,7 +146,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
           NoResi += Resi;
         }
         NoResi = NoResi.substring(0, NoResi.length() - 1);
-        sendStatus( "List", NoResi);
+//        sendStatus( "List", NoResi);
         
 //    dataupdate = false;
 
@@ -165,6 +165,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
       readHistory();
     }
     blinking();
+    screen("No. Resi");
 
 
 
@@ -314,7 +315,7 @@ void loop() {
     {
       debugln("Match" + AllResi);
         
-      bokuOpen("");
+      bokuOpen(allkey);
       blinking();
       
       snprintf(msgi, MSG_BUFFER_SIZE, "Masukan");
@@ -331,7 +332,7 @@ void loop() {
    u8g2.sendBuffer();         // transfer internal memory to the display
     delay(10);
     
-      myBot.sendMessage(GroupID, "--- Received ---\nID: ---" + allkey);
+//      myBot.sendMessage(GroupID, "--- Received ---\nID: ---" + allkey);
       //          isreceive = true;
 
       delay(5000);
@@ -342,7 +343,7 @@ void loop() {
       allkey = allkey + '.';
       addHis(countH,allkey);
       readHistory();
-      sendStatus("List",NoResi);
+//      sendStatus("List",NoResi);
       //dataupdate = true;
       
       allkey = "";

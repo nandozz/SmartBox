@@ -583,7 +583,7 @@ void bokuOpen(String commands) {
   ////////// Telegram
   if (commands.length() > 4)
   {
-    snprintf(msgi, MSG_BUFFER_SIZE, "--- New Received ---\nID: ...%s", commands.c_str());
+    snprintf(msgi, MSG_BUFFER_SIZE, "--- Received ---\nID: ...%s", commands.c_str());
     myBot.sendMessage(GroupID, msgi);
     delay(10);
   }
