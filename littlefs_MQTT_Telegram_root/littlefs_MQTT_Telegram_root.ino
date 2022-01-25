@@ -1,5 +1,5 @@
 //12/3/21
-#define DEBUG 1
+#define DEBUG 0
 #if DEBUG == 1
 #define debug(x) Serial.print(x)
 #define debugln(x) Serial.println(x)
@@ -26,6 +26,7 @@ U8G2_SSD1306_128X32_UNIVISION_F_HW_I2C u8g2(U8G2_R0);
 void callback(char* topic, byte* payload, unsigned int length) {
   String code = "";
   String msg = "";
+  String Resi = "";
   debug("\nMessage arrived [");
   debug(topic);
   debug("] ");
@@ -54,7 +55,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
       {
 
         readList();
-//        resi = resi.substring((resi.length() - 5), resi.length()) + '.';
+        //        resi = resi.substring((resi.length() - 5), resi.length()) + '.';
         resi = resi + '.';
         //        resi.toUpperCase();
         addResi(countL, "New List", resi);
@@ -63,20 +64,20 @@ void callback(char* topic, byte* payload, unsigned int length) {
         NoResi = "";
         for (int i = 0; i < countL; i++)
         {
-          String Resi = "\n" + String(i + 1) + ". " + getValue(AllResi, '.', i);
+          Resi = "\n" + String(i + 1) + ". " + getValue(AllResi, '.', i);
           NoResi += Resi;
         }
         NoResi = NoResi.substring(0, NoResi.length() - 1);
-//        sendStatus("List",NoResi);
+        sendStatus("List", NoResi);
         //dataupdate = true;
-        
+
 
       }
 
     }
     /////////////////// OPEN //////////////////////
     else if (commands == "open") {
-       bokuOpen(commands);
+      bokuOpen(commands);
       delay(7000);
       bokuClose();
     }
@@ -88,7 +89,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
 
     //////////////////// RESTART ///////////////////
     else if (commands == "restart") {
-        screen("RESTART");
+      screen("RESTART");
       client.publish(pub_user.c_str(), "RESTART DONE");
       delay(1000);
       debugln("Boku restart");
@@ -105,50 +106,50 @@ void callback(char* topic, byte* payload, unsigned int length) {
 
     //////////////////// List ///////////////////
     else if (commands == "list") {
-//      readList();
-//      readAddress();
+      readList();
+      //      readAddress();
       NoResi = "";
       for (int i = 0; i < countL; i++)
       {
-        String Resi = "\n" + String(i + 1) + ". --" + getValue(AllResi, '.', i);
+        Resi = "\n" + String(i + 1) + ". --" + getValue(AllResi, '.', i);
         NoResi += Resi;
       }
       NoResi = NoResi.substring(0, NoResi.length() - 1);
-//      sendStatus("List",NoResi);
+      sendStatus("List", NoResi);
       //dataupdate = true;
     }
     else if (commands == "history") {
       readHistory();
       NoResi = "";
-        for (int i = 0; i < countH; i++)
+      for (int i = 0; i < countH; i++)
       {
-        String Resi = "\n" + String(i + 1) + ". --" + getValue(History, '.', i);
+        Resi = "\n" + String(i + 1) + ". --" + getValue(History, '.', i);
         NoResi += Resi;
       }
       NoResi = NoResi.substring(0, NoResi.length() - 1);
-//      sendStatus("History",NoResi);
+      sendStatus("History", NoResi);
       //dataupdate = true;
     }
-    
-   if (commands == "ping" || dataupdate) {
-      client.publish(pub_user.c_str(), "connected");
-        readList();
-        delay(10);
-        readHistory();
-        delay(10);
-        readAddress();
-        delay(10);
 
-        NoResi = "";
-        for (int i = 0; i < countL; i++)
-        {
-          String Resi = "\n" + String(i + 1) + ". " + getValue(AllResi, '.', i);
-          NoResi += Resi;
-        }
-        NoResi = NoResi.substring(0, NoResi.length() - 1);
-//        sendStatus( "List", NoResi);
-        
-//    dataupdate = false;
+    if (commands == "ping" || dataupdate) {
+      client.publish(pub_user.c_str(), "connected");
+      readList();
+      delay(10);
+      readHistory();
+      delay(10);
+      readAddress();
+      delay(10);
+
+      NoResi = "";
+      for (int i = 0; i < countL; i++)
+      {
+        Resi = "\n" + String(i + 1) + ". " + getValue(AllResi, '.', i);
+        NoResi += Resi;
+      }
+      NoResi = NoResi.substring(0, NoResi.length() - 1);
+      sendStatus( "List", NoResi);
+
+      //    dataupdate = false;
 
 
     }
@@ -156,10 +157,11 @@ void callback(char* topic, byte* payload, unsigned int length) {
     //////////////////// CLEAR ///////////////////
     else if (commands == "clearlist") {
       clearList();
+      client.publish(pub_user.c_str(), "listempty");
       debugln("Boku No.Resi Clear");
       readList();
     }
-     else if (commands == "clearhis") {
+    else if (commands == "clearhis") {
       clearHistory();
       debugln("Boku History Clear");
       readHistory();
@@ -173,28 +175,74 @@ void callback(char* topic, byte* payload, unsigned int length) {
     ////////////////////////////// COURIER ///////////////////////////////////
   } else if (requestBy == "courier") {
     readList();
+    snprintf(msgi, MSG_BUFFER_SIZE, "countL:%s", String(countL).c_str());
+      client.publish(pub_user.c_str(), msgi);
     if (AllResi.indexOf(commands) >= 0) {
       bokuOpen(commands);
+      Resi = "";
+      String readL;
+      AllResi = AllResi.substring(0, AllResi.length() - 1);
+debugln("Allresi: "+AllResi);
+debugln("countL nih: "+String(countL));
+      for (int i = 0; i < countL ; i++)
+      {
+        readL = getValue(AllResi, '.', i);
+       
+         if (readL.indexOf(commands) >= 0) {
+          debugln("Match : "+readL);
+          justR = readL;
+          delay(10);
+        }
+        else {
+          Resi += readL + ".";
+          debugln(Resi);
+          delay(10);
+          
+        }
+
+      }
+      clearList();
+
+      //        resi.toUpperCase();
+//      Resi = Resi.substring(0, Resi.length() - 1);
+      debugln(Resi);
+      
+
+      addResi(countL, "New List", Resi);
+    
+      delay(10);
+      readList();
+      delay(10);
+
+      sendStatus("List", Resi);
+
+      snprintf(msgi, MSG_BUFFER_SIZE, "JustReceived:%s", justR.c_str());
+      client.publish(pub_user.c_str(), msgi);
+
       delay(7000);
       bokuClose();
-      allkey = "";
 
-      commands = commands + '.';
-      addHis(countH,commands);
-      readHistory();
-      NoResi = "";
-        for (int i = 0; i < countH; i++)
-      {
-        String Resi = "\n" + String(i + 1) + ". --" + getValue(History, '.', i);
-        NoResi += Resi;
-      }
-      NoResi = NoResi.substring(0, NoResi.length() - 1);
-      sendStatus("History",NoResi);
+      allkey = "";
+      //      commands = commands + '.';
+      //      addHis(countH, commands);
+      //      readHistory();
+      //      NoResi = "";
+      //      for (int i = 0; i < countH; i++)
+      //      {
+      //        Resi = "\n" + String(i + 1) + ". --" + getValue(History, '.', i);
+      //        NoResi += Resi;
+      //      }
+      //      NoResi = NoResi.substring(0, NoResi.length() - 1);
+      //            sendStatus("History", NoResi);
+
+
       //dataupdate = true;
       isreceive = true;
 
     }
     else if (commands == "ping") {
+
+      client.publish(pub_courier.c_str(), "connected");
       readAddress();
     }
     else if (commands == "done") {
@@ -236,7 +284,7 @@ void reconnect() {
 void setup() {
 
   Serial.begin(115200); //Initialising if(DEBUG)Serial Monitor
-  if(!LittleFS.begin()){
+  if (!LittleFS.begin()) {
     debugln("An Error has occurred while mounting LittleFS");
     return;
   }
@@ -246,7 +294,7 @@ void setup() {
   u8g2.clearBuffer();          // clear the internal memory
   u8g2.setFont(u8g2_font_crox5h_tr);  // choose a suitable font at https://github.com/olikraus/u8g2/wiki/fntlistall
   u8g2.drawStr(3, 25, "Processing"); // write something to the internal memory
-  
+
   u8g2.sendBuffer();         // transfer internal memory to the display
   delay(10);
 
@@ -258,26 +306,26 @@ void setup() {
 
   wifi_setting();
   delay(1000);
-//  client.setServer(mqtt_server.c_str(), 1883);
-//  client.setCallback(callback);
+  //  client.setServer(mqtt_server.c_str(), 1883);
+  //  client.setCallback(callback);
   readList();
   String txt;
-  for(int i=25;i<100;i++){
-    txt = String(i) ; 
-    snprintf(msgi, MSG_BUFFER_SIZE,"%s ", txt.c_str());
-  u8g2.clearBuffer();          // clear the internal memory
-  u8g2.setFont(u8g2_font_crox5h_tr);  // choose a suitable font at https://github.com/olikraus/u8g2/wiki/fntlistall
-  u8g2.drawStr(45, 25, msgi); // write something to the internal memory
-  u8g2.drawStr(75, 25, "%");
-  
-  u8g2.sendBuffer();         // transfer internal memory to the display
-  delay(10);
- 
+  for (int i = 25; i < 100; i++) {
+    txt = String(i) ;
+    snprintf(msgi, MSG_BUFFER_SIZE, "%s ", txt.c_str());
+    u8g2.clearBuffer();          // clear the internal memory
+    u8g2.setFont(u8g2_font_crox5h_tr);  // choose a suitable font at https://github.com/olikraus/u8g2/wiki/fntlistall
+    u8g2.drawStr(45, 25, msgi); // write something to the internal memory
+    u8g2.drawStr(75, 25, "%");
+
+    u8g2.sendBuffer();         // transfer internal memory to the display
+    delay(10);
+
   }  delay(100);
   u8g2.clearBuffer();          // clear the internal memory
   u8g2.setFont(u8g2_font_crox5h_tr);  // choose a suitable font at https://github.com/olikraus/u8g2/wiki/fntlistall
   u8g2.drawStr(15, 25, "Complete"); // write something to the internal memory
-  
+
   u8g2.sendBuffer();         // transfer internal memory to the display
   delay(10);
 }
@@ -298,54 +346,100 @@ void loop() {
     debugln(allkey);
     if (key == '*')
     {
-    allkey = allkey.substring(0, allkey.length() - 2);
-    if (allkey.length() <= 0) {
-      bokuClose();
-      blinking();
-      allkey = "No. Resi";
+      allkey = allkey.substring(0, allkey.length() - 2);
+      if (allkey.length() <= 0) {
+        bokuClose();
+        blinking();
+        allkey = "No. Resi";
       }
     }
     screen(allkey);
   }
-  
+
   else if (allkey.length() == 5)
   {
     debugln("in length:" + allkey);
     if (AllResi.indexOf(allkey) >= 0)
     {
-      debugln("Match" + AllResi);
-        
+      debugln("Match in " + AllResi);
+
       bokuOpen(allkey);
       blinking();
-      
-      snprintf(msgi, MSG_BUFFER_SIZE, "Masukan");
-   u8g2.clearBuffer();          // clear the internal memory
-   u8g2.setFont(u8g2_font_crox5h_tr);  // choose a suitable font at https://github.com/olikraus/u8g2/wiki/fntlistall
-   u8g2.drawStr(8,29,msgi);  // write something to the internal memory
-   u8g2.sendBuffer();         // transfer internal memory to the display
-    delay(2000);
-    
-      snprintf(msgi, MSG_BUFFER_SIZE, "Paketnya");
-   u8g2.clearBuffer();          // clear the internal memory
-   u8g2.setFont(u8g2_font_crox5h_tr);  // choose a suitable font at https://github.com/olikraus/u8g2/wiki/fntlistall
-   u8g2.drawStr(8,29,msgi);  // write something to the internal memory
-   u8g2.sendBuffer();         // transfer internal memory to the display
-    delay(10);
-    
-//      myBot.sendMessage(GroupID, "--- Received ---\nID: ---" + allkey);
-      //          isreceive = true;
 
-      delay(5000);
+      snprintf(msgi, MSG_BUFFER_SIZE, "Masukan");
+      u8g2.clearBuffer();          // clear the internal memory
+      u8g2.setFont(u8g2_font_crox5h_tr);  // choose a suitable font at https://github.com/olikraus/u8g2/wiki/fntlistall
+      u8g2.drawStr(8, 29, msgi); // write something to the internal memory
+      u8g2.sendBuffer();         // transfer internal memory to the display
+      delay(2000);
+
+      snprintf(msgi, MSG_BUFFER_SIZE, "Paketnya");
+      u8g2.clearBuffer();          // clear the internal memory
+      u8g2.setFont(u8g2_font_crox5h_tr);  // choose a suitable font at https://github.com/olikraus/u8g2/wiki/fntlistall
+      u8g2.drawStr(8, 29, msgi); // write something to the internal memory
+      u8g2.sendBuffer();         // transfer internal memory to the display
+      delay(10);
+
+      //      myBot.sendMessage(GroupID, "--- Received ---\nID: ---" + allkey);
+      //          isreceive = true;
+      readList();
+       AllResi = AllResi.substring(0, AllResi.length() - 1);
+      debugln();
+      debugln(countL);
+      debugln("countL: " + countL);
+      delay(10);
+
+      justR="";
+      NoResi = "";
+
+      for (int i = 0; i < countL ; i++)
+      {
+        if ( getValue(AllResi, '.', i).indexOf(allkey) >= 0 && i == countL ){
+           justR = getValue(AllResi, '.', i).substring(0, getValue(AllResi, '.', i).length() - 1);;
+        }
+        else if ( getValue(AllResi, '.', i).indexOf(allkey) >= 0 ) {
+          justR = getValue(AllResi, '.', i);
+          debugln("justR: " + justR);
+          delay(10);
+        }
+        else {
+
+          NoResi += getValue(AllResi, '.', i) + ".";
+          delay(10);
+        }
+
+      }
+      clearList();
+
+      //        resi.toUpperCase();
+//      NoResi = NoResi.substring(0, NoResi.length() - 1);
+      debugln("Add NoResi: " + NoResi);
+      addResi(countL, "New List", NoResi);
+      delay(10);
+      readList();
+      delay(10);
+
+
+      sendStatus("List", NoResi);
+
+      snprintf(msgi, MSG_BUFFER_SIZE, "JustReceived:%s", justR.c_str());
+      client.publish(pub_user.c_str(), msgi);
+
+
+
+      //////////////////////////////////////////
+
+      delay(7000);
       bokuClose();
       blinking();
-      
-      readHistory();
-      allkey = allkey + '.';
-      addHis(countH,allkey);
-      readHistory();
-//      sendStatus("List",NoResi);
+
+      //      readHistory();
+      //      allkey = allkey + '.';
+      //      addHis(countH, allkey);
+      //      readHistory();
+      //      sendStatus("List",NoResi);
       //dataupdate = true;
-      
+
       allkey = "";
       screen("No. Resi");
     }
@@ -355,7 +449,7 @@ void loop() {
       bokuOpen("");
       blinking();
       allkey = "";
-      
+
     }
 
   }
@@ -367,12 +461,13 @@ void loop() {
     debugln("Boku No.Resi Clear");
     readList();
     screen("No. Resi");
-    
+    client.publish(pub_user.c_str(), "listempty");
+
   }
 
   else if (allkey == "#" + PIN + "#")
-  {screen("RESET");
-  delay(2000);
+  { screen("RESET");
+    delay(2000);
     blinking();
     myBot.sendMessage(GroupID, "Device ID : " + DevID + "\nGroup ID : " + GroupID + "\n--- Device Reseting ---");
     screen("DONE");

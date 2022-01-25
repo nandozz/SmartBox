@@ -28,7 +28,7 @@ String APpass = "paketbox";       ////
 
 //Variables MQTT
 bool isopen, isreceive,dataupdate = false;
-String Herocode, PIN, NoResi, Address, AllResi,User, History = "";
+String Herocode, PIN, NoResi,justR, Address, AllResi,User, History = "";
 int i = 0;
 String mqtt_server = "broker.hivemq.com";
 String pub_user = "BokuBox/" + Herocode + "/" + DevID;
@@ -391,12 +391,12 @@ void clearList() {
 
   //Write to the file
   clis.print("");
-  delay(1);
+  delay(5);
   //Close the lis
   clis.close();
 
   myBot.sendMessage(GroupID, "List telah dibersihkan");
-  client.publish(pub_user.c_str(), "listempty");
+//  client.publish(pub_user.c_str(), "listempty");
 }
 
 void clearHistory() {
@@ -432,11 +432,13 @@ void readList()
   delay(100);
 
   countL = 0;
-  int maxIndex = AllResi.length() - 1;
+  
+  
+  int maxIndex = AllResi.length();
 
-  for (int i = 0; i <= maxIndex; i++)
+  for (int i = 0; i <  maxIndex; i++)
   {
-    if (AllResi.charAt(i) == '.' || i == maxIndex)
+    if (AllResi.charAt(i) == '.' )
     {
       countL++;
     }
@@ -486,11 +488,11 @@ void addResi(int countL, String commands, String resi)
     alis.close();
 
     debugln("Add successfuly");
-    resi = resi.substring(0, resi.length() - 1);
-    snprintf(msgi, MSG_BUFFER_SIZE, "%s - %s\nBerhasil terdaftar", commands.c_str(), resi.c_str());
-    myBot.sendMessage(GroupID, msgi);
+//    resi = resi.substring(0, resi.length() - 1);
+//    snprintf(msgi, MSG_BUFFER_SIZE, "%s - %s\nBerhasil terdaftar", commands.c_str(), resi.c_str());
+//    myBot.sendMessage(GroupID, msgi);
     delay(10);
-    client.publish(pub_user.c_str(), "List Add");
+//    client.publish(pub_user.c_str(), "List Add");
   }
   else
   {
@@ -539,14 +541,15 @@ void sendStatus(String listof,String NoResi) {
                  "\nStatus Receive : " + (isreceive ? "Success" : "Not Yet");
 
   ////////// Telegram
-  snprintf(msgi, MSG_BUFFER_SIZE, "%s\n%s:%s", state.c_str(),listof.c_str(), NoResi.c_str());
-  myBot.sendMessage(GroupID, msgi);
+//  snprintf(msgi, MSG_BUFFER_SIZE, "%s\n%s:%s", state.c_str(),listof.c_str(), NoResi.c_str());
+//  myBot.sendMessage(GroupID, msgi);
 
   ///////// MQTT
   snprintf (msgi, MSG_BUFFER_SIZE, "List.%s", AllResi.c_str() );
   client.publish(pub_user.c_str(), msgi);
-  snprintf (msgi, MSG_BUFFER_SIZE, "History.%s", History.c_str() );
-  client.publish(pub_user.c_str(), msgi);
+ 
+//  snprintf (msgi, MSG_BUFFER_SIZE, "History.%s", History.c_str() );
+//  client.publish(pub_user.c_str(), msgi);
   delay(100);
 }
 
@@ -589,6 +592,8 @@ void bokuOpen(String commands) {
   }
   client.publish(pub_user.c_str(), "{\"state\":\"Box Open\"}");
   client.publish(pub_courier.c_str(), "{\"state\":\"Box Open\"}");
+  
+//  client.publish(pub_user.c_str(), "JustReceived:%s",commands.c_str());
 }
 
 void bokuClose() {
