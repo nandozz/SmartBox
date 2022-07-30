@@ -395,7 +395,7 @@ void clearList() {
   //Close the lis
   clis.close();
 
-  myBot.sendMessage(GroupID, "List telah dibersihkan");
+//  myBot.sendMessage(GroupID, "List telah dibersihkan");
 //  client.publish(pub_user.c_str(), "listempty");
 }
 
