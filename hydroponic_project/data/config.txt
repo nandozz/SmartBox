@@ -1,0 +1,8 @@
+{
+  "UID": "-465154529",
+  "SSID": "Thanks God",
+  "wfpas": "godbless@",
+  "key": "pas",
+  "PIN": "12345",
+  "address": "Perumahan...."
+}
